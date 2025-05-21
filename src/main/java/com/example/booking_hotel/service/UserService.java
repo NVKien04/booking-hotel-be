@@ -1,14 +1,13 @@
 package com.example.booking_hotel.service;
 
-import com.example.booking_hotel.dto.response.AvatarResponse;
-import com.example.booking_hotel.dto.response.UserResponse;
+import com.example.booking_hotel.dto.response.user.AvatarResponse;
+import com.example.booking_hotel.dto.response.user.UserResponse;
 import com.example.booking_hotel.entity.User;
 import com.example.booking_hotel.exception.AppException;
 import com.example.booking_hotel.exception.ErrorCode;
 import com.example.booking_hotel.mapper.UserMapper;
 import com.example.booking_hotel.repository.UserRepository;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
@@ -26,7 +25,7 @@ public class UserService {
 
     @NonFinal
     @Value("${file.upload-user}")
-    String USER;
+    String UPLOAD_USER;
 
     public UserResponse getInfoUser(String idUser){
         User user = userRepository.findById(idUser).orElseThrow(
@@ -39,7 +38,7 @@ public class UserService {
         User user = userRepository.findById(idUser).orElseThrow(
                 () -> new AppException(ErrorCode.USER_EXISTED)
         );
-        user.setAvatar_img(uploadService.uploadFile(file, USER));
+        user.setAvatar_img(uploadService.uploadFile(file, UPLOAD_USER, "user"));
         var rs = userRepository.save(user);
         return AvatarResponse.builder()
                 .url(rs.getAvatar_img())

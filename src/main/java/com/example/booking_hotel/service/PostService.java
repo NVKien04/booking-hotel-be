@@ -1,16 +1,17 @@
 package com.example.booking_hotel.service;
 
-import com.example.booking_hotel.dto.request.PostCreateRequest;
-import com.example.booking_hotel.dto.response.PostResponse;
+import com.example.booking_hotel.dto.request.post.PostCreateRequest;
+import com.example.booking_hotel.dto.response.ApiResponse;
+import com.example.booking_hotel.dto.response.Pagination;
+import com.example.booking_hotel.dto.response.post.PostCardItemResponse;
+import com.example.booking_hotel.dto.response.post.PostResponse;
+import com.example.booking_hotel.entity.Amenities;
+import com.example.booking_hotel.entity.Place_type;
 import com.example.booking_hotel.entity.Posts;
 import com.example.booking_hotel.entity.User;
-import com.example.booking_hotel.enums.Accommodation_type;
 import com.example.booking_hotel.mapper.PostMapper;
-import com.example.booking_hotel.repository.AmenitieRepository;
-import com.example.booking_hotel.repository.PostRepository;
-import com.example.booking_hotel.repository.UserRepository;
+import com.example.booking_hotel.repository.*;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
@@ -19,10 +20,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -39,6 +43,12 @@ public class PostService {
 
     UserRepository userRepository;
 
+    AmenitiesRepository amenitiesRepository;
+
+    Place_TypeRepository   placeTypeRepository;
+
+    Post_imagesRepository post_imagesRepository;
+
 
     UploadService uploadService;
 
@@ -48,17 +58,56 @@ public class PostService {
         Posts posts = postMapper.toPosts(request);
         User owner = userRepository.findById(request.getOwner())
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + request.getOwner()));
-        posts.setAccommodation_type(Accommodation_type.HOTEL);
-        posts.setThumbnail(uploadService.uploadFile(request.getThumbnail(), thumbnailPath));
+        posts.setThumbnail(uploadService.uploadFile(request.getThumbnail(), thumbnailPath, "post"));
+        List<String> amenityIds = request.getAmenity_id();
+        Set<Amenities> amenities = new HashSet<>(amenitiesRepository.findAllById(amenityIds));
+        posts.setAmenities(amenities);
+        Optional<Place_type> place_type = placeTypeRepository.findById(request.getPlace_type_id());
+        posts.setPlace_type(place_type.orElse(null));
         posts.setOwner(owner);
         log.info("Post created");
         return postMapper.toPostResponse(postRepository.save(posts));
     }
 
-    public List<PostResponse> getAll(int page, int size){
-        Pageable pageable = PageRequest.of(page, size);
-        List<Posts> listPosts = postRepository.findAll(pageable).getContent();
-         return listPosts.stream().map(postMapper::toPostResponse).collect(Collectors.toList());
+    public ApiResponse<List<PostCardItemResponse>> getAll(int page, int size, String sort, String search){
+        Sort sortable = Sort.by("rating").ascending();
+        if(sort != null && !sort.isEmpty()){
+            String[] sortParams = sort.split(",");
+            String sortField = sortParams[0];
+            String sortDirection = sortParams.length > 1 ? sortParams[1] : "asc";
+            sortable = sortDirection.equalsIgnoreCase("desc")
+                    ? Sort.by(sortField).descending()
+                    : Sort.by(sortField).ascending();
+
+        }
+        Pageable pageable = PageRequest.of(page, size, sortable);
+        Page<Posts> pagePosts = (search == null || search.isEmpty())
+                ? postRepository.findAll(pageable)
+                : postRepository.findByTitleContainingIgnoreCase(search, pageable);
+
+        List<Posts> listPost = pagePosts.getContent();
+
+        var pagination = Pagination.builder()
+                .page(page)
+                .limit(size)
+                .totalPages(pagePosts.getTotalPages())
+                .totalRecords(pagePosts.getTotalElements())
+                .build();
+        List<PostCardItemResponse> listPostCardItemResponse = listPost.stream().map(postMapper::toPostCardItemResponse).toList();
+
+         return ApiResponse.<List<PostCardItemResponse>>builder()
+                 .message("Success")
+                 .data(listPostCardItemResponse)
+                 .pagination(pagination)
+                 .build();
     }
+
+    public ApiResponse<PostResponse>  getPostDetail(String id){
+
+
+        return ApiResponse.<PostResponse>builder().build();
+    }
+
+
 
 }

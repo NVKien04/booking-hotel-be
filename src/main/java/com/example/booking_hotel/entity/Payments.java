@@ -1,6 +1,5 @@
 package com.example.booking_hotel.entity;
 
-import com.example.booking_hotel.enums.PaymentStatus;
 import com.example.booking_hotel.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,14 +21,13 @@ import java.util.List;
 
 public class Payments extends BaseEntity {
 
+    @OneToOne
+    @JoinColumn(name = "booking_id", unique = true)
+    Bookings booking;
 
-    @OneToOne(mappedBy = "payments")
-    Bookings bookings;
-
-
-    @Enumerated(EnumType.STRING)
-    PaymentStatus paymentStatus;
-
+    @ManyToOne
+            @JoinColumn(name = "status_id")
+    PaymentStatus status;
     String method;
     BigDecimal amount;
 }

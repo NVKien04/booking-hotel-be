@@ -1,12 +1,11 @@
 package com.example.booking_hotel.service;
 
-import com.example.booking_hotel.dto.request.AuthRequest;
-import com.example.booking_hotel.dto.request.IntrospectRequest;
-import com.example.booking_hotel.dto.request.LoginRequest;
-import com.example.booking_hotel.dto.request.RegisterRequest;
-import com.example.booking_hotel.dto.response.AuthResponse;
-import com.example.booking_hotel.dto.response.IntrospectResponse;
-import com.example.booking_hotel.dto.response.UserResponse;
+import com.example.booking_hotel.dto.request.auth.IntrospectRequest;
+import com.example.booking_hotel.dto.request.auth.LoginRequest;
+import com.example.booking_hotel.dto.request.auth.RegisterRequest;
+import com.example.booking_hotel.dto.response.auth.AuthResponse;
+import com.example.booking_hotel.dto.response.auth.IntrospectResponse;
+import com.example.booking_hotel.dto.response.user.UserResponse;
 import com.example.booking_hotel.entity.User;
 import com.example.booking_hotel.enums.Role;
 import com.example.booking_hotel.exception.AppException;
@@ -19,7 +18,6 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;

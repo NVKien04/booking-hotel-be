@@ -1,17 +1,15 @@
 package com.example.booking_hotel.entity;
 
-import com.example.booking_hotel.enums.Accommodation_type;
-import com.example.booking_hotel.enums.Role;
+
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
@@ -29,10 +27,7 @@ public class Posts extends BaseEntity {
     String description;
     @Column(columnDefinition = "TEXT")
     String short_description;
-    @Enumerated(EnumType.STRING)
-    @Column(name = "accommodation_type", nullable = false)
-    Accommodation_type accommodation_type;
-    BigDecimal price;
+    BigDecimal night_price;
     String thumbnail;
     int capacity;
     Boolean available;
@@ -47,15 +42,21 @@ public class Posts extends BaseEntity {
             joinColumns = @JoinColumn(name = "post_id"),
             inverseJoinColumns = @JoinColumn(name = "amenity_id")
     )
-    List<Amenities> amenities = new ArrayList<>();
-    String location;
-
-
+    Set<Amenities> amenities = new HashSet<>();
+    int rating;
+    int totalReviews;
+    String city;
+    String country;
     @PrePersist
     public void ensureActiveIsSet() {
         if (available == null) {
             available = true;
         }
     }
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Reviews> reviews = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "placeType_id", nullable = false)
+    Place_type place_type;
 
 }

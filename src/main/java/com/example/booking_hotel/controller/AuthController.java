@@ -1,12 +1,11 @@
 package com.example.booking_hotel.controller;
 
 
-import com.example.booking_hotel.dto.request.AuthRequest;
-import com.example.booking_hotel.dto.request.LoginRequest;
-import com.example.booking_hotel.dto.request.RegisterRequest;
+import com.example.booking_hotel.dto.request.auth.LoginRequest;
+import com.example.booking_hotel.dto.request.auth.RegisterRequest;
 import com.example.booking_hotel.dto.response.ApiResponse;
-import com.example.booking_hotel.dto.response.AuthResponse;
-import com.example.booking_hotel.dto.response.UserResponse;
+import com.example.booking_hotel.dto.response.auth.AuthResponse;
+import com.example.booking_hotel.dto.response.user.UserResponse;
 import com.example.booking_hotel.service.AuthService;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

@@ -1,12 +1,13 @@
 package com.example.booking_hotel.entity;
 
-import com.example.booking_hotel.enums.BookingStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Entity
@@ -25,22 +26,15 @@ public class Bookings extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
             @JoinColumn(name = "user_id")
     User user;
-
-    @OneToOne
-            @JoinColumn(name = "payment_id", referencedColumnName = "id")
-            Payments payments;
-
-    @OneToOne
-    @JoinColumn(name = "reviews_id", referencedColumnName = "id")
-    Reviews reviews;
-
-            
-
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Reviews> reviews = new ArrayList<>();
     Date check_in;
     Date check_out;
     BigDecimal totalPrice;
-
-    @Enumerated(EnumType.STRING)
+    int numberOfAdults;
+    int numberOfChildren;
+    @ManyToOne
+    @JoinColumn(name = "status_id")
     BookingStatus status;
 
 

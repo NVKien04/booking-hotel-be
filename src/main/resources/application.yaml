@@ -11,6 +11,9 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       ddl-auto: update # create, create-drop, update, validate, none
+  sql:
+    init:
+      mode: never
 jwt:
   signerKey: "ISaeBKjUzdPg8OWFRm5Cq42I4XZlefm2s/6nxKOpC+j8aHQ16dYfX6ON6AAfu3Te"
   valid-duration: 60

@@ -22,7 +22,7 @@ public class UploadService {
     @Value("${file.upload-dir}")
     String uploadDir;
 
-    public String uploadFile(MultipartFile file, String subFolder) {
+    public String uploadFile(MultipartFile file, String subFolder, String controller) {
         try{
             if(file == null|| file.isEmpty()){
                 throw new  RuntimeException("file is empty");
@@ -32,13 +32,15 @@ public class UploadService {
             Files.createDirectories(folderPath);
             Path filePath = folderPath.resolve(fileName);
             file.transferTo(filePath.toFile());
-            return "http://localhost:8081/api/post/" + subFolder + "/" + fileName;
+            return "http://localhost:8081/api/"+ controller + "/" + subFolder + "/" + fileName;
         }
         catch(Exception e){
             throw new RuntimeException("Failed to up load files:" + e.getMessage() );
         }
 
     }
+
+
 
 
 

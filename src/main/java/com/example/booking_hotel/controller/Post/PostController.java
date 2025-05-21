@@ -1,10 +1,10 @@
 package com.example.booking_hotel.controller.Post;
 
-import com.example.booking_hotel.dto.request.PostCreateRequest;
+import com.example.booking_hotel.dto.request.post.PostCreateRequest;
 import com.example.booking_hotel.dto.response.ApiResponse;
-import com.example.booking_hotel.dto.response.PostResponse;
+import com.example.booking_hotel.dto.response.post.PostCardItemResponse;
+import com.example.booking_hotel.dto.response.post.PostResponse;
 import com.example.booking_hotel.service.PostService;
-import com.example.booking_hotel.service.UserService;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -31,10 +31,9 @@ public class PostController {
     PostService postService;
 
     @PostMapping("/create")
-    private ApiResponse<PostResponse> createPost(@ModelAttribute PostCreateRequest postCreateRequest) {
+    public ApiResponse<PostResponse> createPost(@ModelAttribute PostCreateRequest postCreateRequest) {
         PostResponse postResponse = postService.create(postCreateRequest);
         log.info("Post created");
-
         return ApiResponse.<PostResponse >builder()
                 .data(postResponse)
                 .message("Success")
@@ -42,19 +41,44 @@ public class PostController {
     }
 
     @GetMapping("/getAllPost")
-    private ApiResponse<List<PostResponse>> getAllPost() {
-        List<PostResponse> listPosts = postService.getAll(0,2);
-        return ApiResponse.<List<PostResponse>>builder()
-                .message("success")
-                .data(listPosts)
-                .build();
+    public ApiResponse<List<PostCardItemResponse>> getPost(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "rating,asc") String sort
+    ) {
+        return postService.getAll(page, size, sort, search);
     }
 
 
-    @GetMapping("/thumbnail_post/{thumbnail}")
-    private ResponseEntity<Resource> thumbnail(@PathVariable String thumbnail) {
+        @GetMapping("/thumbnail_post/{thumbnail}")
+        public ResponseEntity<Resource> thumbnail(@PathVariable String thumbnail) {
+            try{
+                Path filePath = Paths.get("uploads/thumbnail_post").resolve(thumbnail).normalize();
+                Resource resource = new UrlResource(filePath.toUri());
+                String contentType = Files.probeContentType(filePath);
+
+
+                if (!resource.exists()) {
+                    return ResponseEntity.notFound().build();
+                }
+                return ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType(contentType))
+                        .body(resource);
+            }
+            catch (MalformedURLException e){
+                return ResponseEntity.badRequest().build();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+
+
+    @GetMapping("/posts/{image_post}")
+    public ResponseEntity<Resource> image_post(@PathVariable String image_post) {
         try{
-            Path filePath = Paths.get("uploads/thumbnail_post").resolve(thumbnail).normalize();
+            Path filePath = Paths.get("uploads/posts").resolve(image_post).normalize();
             Resource resource = new UrlResource(filePath.toUri());
             String contentType = Files.probeContentType(filePath);
 
@@ -71,6 +95,11 @@ public class PostController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+    @GetMapping("/{id}")
+    public ApiResponse<PostResponse> getPostDetail(@PathVariable String id) {
+
+        return ApiResponse.<PostResponse>builder().build();
     }
 
 
