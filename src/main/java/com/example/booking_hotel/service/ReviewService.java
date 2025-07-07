@@ -12,7 +12,7 @@ import com.nimbusds.jwt.SignedJWT;
 
 import java.text.ParseException;
 
-public interface AuthInterface {
+public interface AuthService {
      UserResponse registerRenter(RegisterRequest registerRequest);
 
      AuthResponse authenticated(LoginRequest loginRequest);
