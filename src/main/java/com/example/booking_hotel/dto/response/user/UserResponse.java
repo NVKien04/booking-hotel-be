@@ -1,10 +1,9 @@
 package com.example.booking_hotel.dto.response.user;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -15,7 +14,6 @@ import java.time.LocalDate;
 public class UserResponse {
     String username;
     String email;
-    String password;
-    String phone;
-    LocalDate dob;
+    String avatar_img;
+    String role;
 }

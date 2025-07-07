@@ -1,22 +1,17 @@
 package com.example.booking_hotel.entity;
 
-import com.example.booking_hotel.enums.Role;
 import jakarta.persistence.*;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.Fetch;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-
-@Data
+@Getter
+@Setter
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-
 public class Post_images extends BaseEntity {
     String image_url;
 

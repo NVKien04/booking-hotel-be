@@ -1,161 +1,82 @@
 package com.example.booking_hotel.service;
 
-import com.example.booking_hotel.configuration.SecurityUtil;
-import com.example.booking_hotel.dto.request.post.PostCreateRequest;
-import com.example.booking_hotel.dto.response.ApiResponse;
-import com.example.booking_hotel.dto.response.Pagination;
-import com.example.booking_hotel.dto.response.post.PostCardItemResponse;
-import com.example.booking_hotel.dto.response.post.PostDetailResponse;
-import com.example.booking_hotel.dto.response.post.PostResponse;
-import com.example.booking_hotel.entity.Amenities;
-import com.example.booking_hotel.entity.Place_type;
-import com.example.booking_hotel.entity.Posts;
-import com.example.booking_hotel.entity.User;
+import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
+import com.example.booking_hotel.entity.*;
+import com.example.booking_hotel.enums.Lock_status;
 import com.example.booking_hotel.exception.AppException;
 import com.example.booking_hotel.exception.ErrorCode;
-import com.example.booking_hotel.mapper.PostMapper;
 import com.example.booking_hotel.repository.*;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-
-
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class PostServiceImpl implements PostService {
+public class PostAvailabilityServiceImpl implements PostAvailabilityService {
 
-    @NonFinal
-            @Value("${file.upload-post}")
-            String thumbnailPath;
-
+    static final int NIGHT_MAX = 365;
     PostRepository postRepository;
-
-    BookingService bookingService;
-
-    UserRepository userRepository;
-
-    AmenitiesRepository amenitiesRepository;
-
-    Place_TypeRepository   placeTypeRepository;
-
-
-    SecurityUtil securityUtil;
-
-
-    UploadService uploadService;
-
-    PostMapper postMapper;
+    PostAvailabilityRepository postAvailabilityRepository;
 
     @Override
-    public PostResponse create(PostCreateRequest request){
-        var userId = securityUtil.getCurrentUserId();
-        Posts posts = postMapper.toPosts(request);
-        User owner = userRepository.findById(userId)
-                .orElseThrow(() -> new  AppException(ErrorCode.USER_NOT_EXISTED));
-        posts.setThumbnail(uploadService.uploadFile(request.getThumbnail(), thumbnailPath, "post"));
-        List<String> amenityIds = request.getAmenity_id();
-        Set<Amenities> amenities = new HashSet<>(amenitiesRepository.findAllById(amenityIds));
-        posts.setAmenities(amenities);
-        Optional<Place_type> place_type = placeTypeRepository.findById(request.getPlace_type_id());
-        posts.setPlace_type(place_type.orElse(null));
-        posts.setOwner(owner);
-        log.info("Post created");
-        return postMapper.toPostResponse(postRepository.save(posts));
-    }
+    public List<PostsAvailability> generateAvailability(
+            String postId, BigDecimal defaultPrice, BigDecimal weekendPrice, LocalDate checkIn, LocalDate checkOut) {
 
-    @Override
-    public ApiResponse<List<PostCardItemResponse>> search(int page, int size, String sort, String search){
-        Sort sortable = Sort.by("rating").ascending();
-        if(sort != null && !sort.isEmpty()){
-            String[] sortParams = sort.split(",");
-            String sortField = sortParams[0];
-            String sortDirection = sortParams.length > 1 ? sortParams[1] : "asc";
-            sortable = sortDirection.equalsIgnoreCase("desc")
-                    ? Sort.by(sortField).descending()
-                    : Sort.by(sortField).ascending();
-
+        if (checkIn == null || checkOut == null || !checkIn.isBefore(checkOut)) {
+            throw new AppException(ErrorCode.INVALID_DATES);
         }
-        Pageable pageable = PageRequest.of(page, size, sortable);
-        Page<Posts> pagePosts = (search == null || search.isEmpty())
-                ? postRepository.findAll(pageable)
-                : postRepository.findByTitleContainingIgnoreCase(search, pageable);
+        Posts posts = postRepository.findById(postId).orElseThrow(() -> new AppException(ErrorCode.USER_EXISTED));
+        List<PostsAvailability> availabilityList = new ArrayList<>();
+        long days = ChronoUnit.DAYS.between(checkIn, checkOut);
 
-        List<Posts> listPost = pagePosts.getContent();
+        for (int i = 0; i < days; i++) {
+            LocalDate date = checkIn.plusDays(i);
+            DayOfWeek dayOfWeek = date.getDayOfWeek();
+            boolean isWeekend = (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY);
 
-        var pagination = Pagination.builder()
-                .page(page)
-                .limit(size)
-                .totalPages(pagePosts.getTotalPages())
-                .totalRecords(pagePosts.getTotalElements())
-                .build();
-        List<PostCardItemResponse> listPostCardItemResponse = listPost.stream().map(postMapper::toPostCardItemResponse).toList();
-
-         return ApiResponse.<List<PostCardItemResponse>>builder()
-                 .message("Success")
-                 .data(listPostCardItemResponse)
-                 .pagination(pagination)
-                 .build();
+            BigDecimal price = (isWeekend && weekendPrice != null && weekendPrice.compareTo(BigDecimal.ZERO) > 0)
+                    ? weekendPrice
+                    : defaultPrice;
+            PostsAvailability availability = new PostsAvailability();
+            availability.setDate(date);
+            availability.setPrice(price);
+            availability.setStatus(Lock_status.DRAFT.getCode());
+            availability.setPost(posts);
+            availabilityList.add(availability);
+        }
+        return availabilityList;
     }
 
     @Override
-    public ApiResponse<PostDetailResponse>  getPostDetail(String id){
-            Posts post = postRepository.findById(id).orElseThrow(() -> new  AppException(ErrorCode.POST_NOT_EXISTED));
-            var postDetail = postMapper.toPostDetailResponse(post);
-            postDetail.setAvailableDates(bookingService.getAvailableDate(id));
-
-            return ApiResponse.<PostDetailResponse>builder()
-                .code(1)
-                .message("success")
-                .data(postDetail)
-                .build();
+    public List<PostsAvailability> getLockDate(String postId, LocalDate checkIn, LocalDate checkOut) {
+        long nights = ChronoUnit.DAYS.between(checkIn, checkOut);
+        if (nights > NIGHT_MAX) {
+            throw new AppException(ErrorCode.ROOM_ALREADY_BOOKED);
+        }
+        List<PostsAvailability> aDays = postAvailabilityRepository.findLockPtAvailability(
+                postId, Lock_status.DRAFT.getCode(), checkIn, checkOut.minusDays(1));
+        if (!aDays.isEmpty()) {
+            throw new AppException(ErrorCode.ROOM_ALREADY_BOOKED);
+        }
+        return aDays;
     }
 
     @Override
-    public List<LocalDate> getSelectDates(String id) {
-        return bookingService.getAvailableDate(id);
-
+    public List<LocalDate> getLockDateList(String postId) {
+        List<PostsAvailability> aDays =
+                postAvailabilityRepository.findLockPtAvailabilityList(postId, Lock_status.DRAFT.getCode());
+        return aDays.stream().map(PostsAvailability::getDate).sorted().collect(Collectors.toList());
     }
-
-    @Override
-    public ApiResponse<List<PostCardItemResponse>> getPostCardItems(int page, int size) {
-
-
-        Pageable  pageable = PageRequest.of(page, size);
-        Page<Posts> pagePosts = postRepository.findAll(pageable);
-        List<Posts> listPost = pagePosts.getContent();
-
-        var pagination = Pagination.builder()
-                .page(page)
-                .limit(size)
-                .totalPages(pagePosts.getTotalPages())
-                .totalRecords(pagePosts.getTotalElements())
-                .build();
-        List<PostCardItemResponse> listPostCardItemResponse = listPost.stream().map(postMapper::toPostCardItemResponse).toList();
-
-        return ApiResponse.<List<PostCardItemResponse>>builder()
-                .message("Success")
-                .data(listPostCardItemResponse)
-                .pagination(pagination)
-                .build();
-    }
-
-
-
-
 }

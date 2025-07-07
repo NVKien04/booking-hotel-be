@@ -1,21 +1,23 @@
 package com.example.booking_hotel.enums;
 
-public enum Booking_status {
-    CONFIRMED("Đã xác nhận"),
-    CHECKED_IN("Đã nhận phòng"),
-    CHECKED_OUT("Đã trả phòng"),
-    CANCELLED("Đã huỷ"),
-    NO_SHOW("Vắng mặt không báo"),
-    COMPLETED("Hoàn tất");
+public enum Payment_status {
+    INIT("INIT", "Chưa thanh toán"),
+    SUCCESS("SUCCESS", "Thanh toán thành công"),
+    FAILED("FAILED", "Thanh toán thất bại");
 
+    private final String code;
     private final String displayName;
 
-    Booking_status(String displayName) {
+    Payment_status(String code, String displayName) {
+        this.code = code;
         this.displayName = displayName;
+    }
+
+    public String getCode() {
+        return code;
     }
 
     public String getDisplayName() {
         return displayName;
     }
 }
-

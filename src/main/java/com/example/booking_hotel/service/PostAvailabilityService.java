@@ -1,27 +1,17 @@
 package com.example.booking_hotel.service;
 
-import com.example.booking_hotel.dto.request.post.PostCreateRequest;
-import com.example.booking_hotel.dto.response.ApiResponse;
-import com.example.booking_hotel.dto.response.post.PostCardItemResponse;
-import com.example.booking_hotel.dto.response.post.PostDetailResponse;
-import com.example.booking_hotel.dto.response.post.PostResponse;
-
-
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-public interface PostService {
+import com.example.booking_hotel.entity.PostsAvailability;
 
-    public PostResponse create(PostCreateRequest request);
+public interface PostAvailabilityService {
 
-    public ApiResponse<List<PostCardItemResponse>> search(int page, int size, String sort, String search);
+    List<PostsAvailability> generateAvailability(
+            String postId, BigDecimal defaultPrice, BigDecimal weekendPrice, LocalDate checkIn, LocalDate checkOut);
 
-    public ApiResponse<PostDetailResponse>  getPostDetail(String id);
+    List<PostsAvailability> getLockDate(String postId, LocalDate checkIn, LocalDate checkOut);
 
-    public List<LocalDate> getSelectDates(String id);
-
-    public ApiResponse<List<PostCardItemResponse>> getPostCardItems(int page, int size);
-
-
-
+    List<LocalDate> getLockDateList(String postId);
 }

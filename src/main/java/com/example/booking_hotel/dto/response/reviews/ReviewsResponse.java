@@ -1,7 +1,7 @@
-package com.example.booking_hotel.dto.response.post_img;
-
+package com.example.booking_hotel.dto.response.reviews;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -11,6 +11,9 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Post_ImgResponse {
-    String image_url;
+public class ReviewsResponse {
+    String username;
+    String avatar_img;
+    int rating;
+    String comment;
 }

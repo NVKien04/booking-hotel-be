@@ -1,9 +1,9 @@
 package com.example.booking_hotel.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.query.sqm.internal.KeyBasedPagination;
 
 @Data
 @NoArgsConstructor
@@ -17,5 +17,4 @@ public class ApiResponse<T> {
     String message;
     T data;
     Pagination pagination;
-
 }

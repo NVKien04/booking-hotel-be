@@ -1,15 +1,16 @@
 package com.example.booking_hotel.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.FieldDefaults;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
 @MappedSuperclass
 @Getter
@@ -32,5 +33,4 @@ public abstract class BaseEntity {
 
     @Column
     private Boolean isActive = true;
-
 }

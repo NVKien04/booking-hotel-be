@@ -1,27 +1,25 @@
 package com.example.booking_hotel.service;
 
-import com.example.booking_hotel.dto.request.post.PostCreateRequest;
-import com.example.booking_hotel.dto.response.ApiResponse;
-import com.example.booking_hotel.dto.response.post.PostCardItemResponse;
-import com.example.booking_hotel.dto.response.post.PostDetailResponse;
-import com.example.booking_hotel.dto.response.post.PostResponse;
+import java.math.BigDecimal;
 
+import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.List;
+@Service
+public class DiscountService {
 
-public interface PostService {
+    private static final int LONG_STAY = 3;
+    private static final BigDecimal LONG_STAY_DISCOUNT_RATE = BigDecimal.valueOf(-0.05);
 
-    public PostResponse create(PostCreateRequest request);
-
-    public ApiResponse<List<PostCardItemResponse>> search(int page, int size, String sort, String search);
-
-    public ApiResponse<PostDetailResponse>  getPostDetail(String id);
-
-    public List<LocalDate> getSelectDates(String id);
-
-    public ApiResponse<List<PostCardItemResponse>> getPostCardItems(int page, int size);
-
-
-
+    /**
+     * Tính giảm giá dựa trên số đêm và tổng phụ (subtotal).
+     * @param nights Số đêm ở.
+     * @param subtotal Tổng giá chưa giảm.
+     * @return Số tiền giảm (âm nếu giảm).
+     */
+    public BigDecimal calculateDiscount(long nights, BigDecimal subtotal) {
+        if (nights >= LONG_STAY) {
+            return subtotal.multiply(LONG_STAY_DISCOUNT_RATE); // âm 5%
+        }
+        return BigDecimal.ZERO;
+    }
 }

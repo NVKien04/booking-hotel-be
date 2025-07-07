@@ -1,11 +1,11 @@
 package com.example.booking_hotel.repository;
 
-import com.example.booking_hotel.entity.Amenities;
-import com.example.booking_hotel.entity.Place_type;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import com.example.booking_hotel.entity.Place_type;
 
 @Repository
 public interface Place_TypeRepository extends JpaRepository<Place_type, String> {

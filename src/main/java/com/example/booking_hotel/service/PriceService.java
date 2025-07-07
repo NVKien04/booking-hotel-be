@@ -1,47 +1,37 @@
 package com.example.booking_hotel.service;
 
-import com.example.booking_hotel.repository.UserRepository;
+import java.math.BigDecimal;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.example.booking_hotel.dto.PriceDto;
+import com.example.booking_hotel.entity.PostsAvailability;
+
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.experimental.NonFinal;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class UploadService {
-    @NonFinal
-    @Value("${file.upload-dir}")
-    String uploadDir;
+public class PriceService {
+    DiscountService discountService;
 
-    public String uploadFile(MultipartFile file, String subFolder, String controller) {
-        try{
-            if(file == null|| file.isEmpty()){
-                throw new  RuntimeException("file is empty");
-            }
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            Path folderPath = Paths.get(uploadDir, subFolder);
-            Files.createDirectories(folderPath);
-            Path filePath = folderPath.resolve(fileName);
-            file.transferTo(filePath.toFile());
-            return "http://localhost:8081/api/img"+ "/" + subFolder + "/" + fileName;
-        }
-        catch(Exception e){
-            throw new RuntimeException("Failed to up load files:" + e.getMessage() );
-        }
+    public PriceDto calculatePrice(List<PostsAvailability> aDays) {
 
+        var night = aDays.size();
+        BigDecimal subtotal = BigDecimal.ZERO;
+
+        for (var aDay : aDays) {
+            subtotal = subtotal.add(aDay.getPrice());
+        }
+        var discount = discountService.calculateDiscount(night, subtotal);
+
+        return PriceDto.builder()
+                .subtotal(subtotal)
+                .discount(discount)
+                .totalAmount(subtotal.add(discount))
+                .build();
     }
-
-
-
-
-
 }

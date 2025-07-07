@@ -9,6 +9,10 @@ spring:
     password: root
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
     hibernate:
       ddl-auto: update # create, create-drop, update, validate, none
   sql:

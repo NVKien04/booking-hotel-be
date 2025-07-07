@@ -1,12 +1,12 @@
 package com.example.booking_hotel.dto.response.post;
 
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @NoArgsConstructor
@@ -17,14 +17,12 @@ import java.time.LocalDateTime;
 public class PostCardItemResponse {
     String id;
     String title;
-    BigDecimal night_price;
+    BigDecimal nightPrice;
     String short_description;
     String thumbnail;
     int rating;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
     String city;
-    String country;
-
-
+    String fullAddress;
 }

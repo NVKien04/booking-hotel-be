@@ -5,6 +5,7 @@ public enum Role {
     HOST("HOST");
 
     private String name;
+
     Role(String name) {
         this.name = name;
     }

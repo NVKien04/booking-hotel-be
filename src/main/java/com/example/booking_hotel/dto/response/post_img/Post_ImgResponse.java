@@ -1,12 +1,9 @@
-package com.example.booking_hotel.dto.response.post;
-
+package com.example.booking_hotel.dto.response.post_img;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor

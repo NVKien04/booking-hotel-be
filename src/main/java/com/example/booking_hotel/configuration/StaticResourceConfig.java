@@ -9,8 +9,6 @@ public class StaticResourceConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // Bất cứ request nào bắt đầu với /uploads/ sẽ map đến thư mục uploads ngoài project
-        registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:uploads/");
+        registry.addResourceHandler("/uploads/**").addResourceLocations("file:uploads/");
     }
-
 }

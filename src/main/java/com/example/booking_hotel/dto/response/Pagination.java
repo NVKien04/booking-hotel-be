@@ -1,6 +1,7 @@
 package com.example.booking_hotel.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -16,6 +17,4 @@ public class Pagination {
     int limit;
     int totalPages;
     long totalRecords;
-
-
 }

@@ -1,16 +1,17 @@
 package com.example.booking_hotel.dto.response.post;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
 
-import com.example.booking_hotel.entity.Reviews;
-import com.example.booking_hotel.entity.User;
+import com.example.booking_hotel.dto.response.amenities.AmenitiesResponse;
+import com.example.booking_hotel.dto.response.post_img.Post_ImgResponse;
+import com.example.booking_hotel.dto.response.reviews.ReviewsResponse;
+import com.example.booking_hotel.dto.response.user.UserResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -23,17 +24,14 @@ public class PostDetailResponse {
     String title;
     String description;
     String short_description;
-    BigDecimal night_price;
+    BigDecimal nightPrice;
     int capacity;
-    List<String>  img_urls = new ArrayList<>();
-    List<String>  amenities = new ArrayList<>();
-    User user = new User();
-    List<Reviews> reviews = new ArrayList<>();
+    List<Post_ImgResponse> post_imagesList;
+    List<AmenitiesResponse> amenities;
+    UserResponse owner;
+    List<ReviewsResponse> reviews;
     int rating;
     int totalReviews;
-    String city;
-    String country;
-    List<LocalDateTime> availableDates;
-
-
+    List<LocalDate> availableDates;
+    String fullAddress;
 }

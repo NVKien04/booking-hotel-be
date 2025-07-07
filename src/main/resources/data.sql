@@ -1,9 +1,7 @@
 INSERT INTO place_type (id, name, icon, description) VALUES
-(1, 'Hotel', 'fa-hotel', 'Khách sạn cao cấp'),
-  (2, 'Homestay', 'fa-home', 'Nhà nghỉ gia đình'),
- (3, 'Apartment', 'fa-building', 'Căn hộ dịch vụ riêng');
-
-
+('hotel', 'Hotel', 'fa-hotel', 'Khách sạn cao cấp'),
+  ('homestay', 'Homestay', 'fa-home', 'Nhà nghỉ gia đình'),
+ ('apartment', 'Apartment', 'fa-building', 'Căn hộ dịch vụ riêng');
 
 INSERT INTO amenities (id, name, icon) VALUES
                                            (1, 'Wi-fi', 'fa-wifi'),

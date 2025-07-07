@@ -1,19 +1,27 @@
 package com.example.booking_hotel.repository;
 
-import com.example.booking_hotel.entity.User;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
+import java.time.LocalDate;
+import java.util.List;
 
-import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import com.example.booking_hotel.entity.Bookings;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, String> {
+public interface BookingRepository extends JpaRepository<Bookings, String> {
 
-    boolean existsByEmail(String email);
+    @Query(
+            "select b from Bookings b where b.posts.id = :postId and  b.stats = :Status And :newCheckIn < b.checkOut and :newCheckOut > b.checkIn")
+    List<Bookings> findOverLappingBookings(
+            @Param("postId") String postId,
+            @Param("newCheckIn") LocalDate newCheckIn,
+            @Param("newCheckOut") LocalDate newCheckout,
+            @Param("Status") String Status);
 
-    Optional<User> findByEmail(String email);
+    @Query("select b from Bookings b where b.posts.id = :postId and b.stats in :statusList")
+    List<Bookings> findByPostIdAndStatusIn(
+            @Param("postId") String postId, @Param("statusList") List<String> statusList);
 }

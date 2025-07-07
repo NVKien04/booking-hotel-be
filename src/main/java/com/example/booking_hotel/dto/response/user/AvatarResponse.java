@@ -1,7 +1,7 @@
 package com.example.booking_hotel.dto.response.user;
 
-
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -13,6 +13,4 @@ import lombok.experimental.FieldDefaults;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AvatarResponse {
     String url;
-
-
 }
