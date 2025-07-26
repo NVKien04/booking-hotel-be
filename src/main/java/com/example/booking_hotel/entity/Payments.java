@@ -1,6 +1,7 @@
 package com.example.booking_hotel.entity;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
@@ -27,5 +28,5 @@ public class Payments extends BaseEntity {
     String txn_ref;
     String response_code;
     String transaction_status;
-    LocalDateTime transaction_date;
+    Instant transaction_date;
 }

@@ -22,3 +22,4 @@ public interface PostService {
 
     public ApiResponse<List<PostCardItemResponse>> getPostCardItems(int page, int size);
 }
+    

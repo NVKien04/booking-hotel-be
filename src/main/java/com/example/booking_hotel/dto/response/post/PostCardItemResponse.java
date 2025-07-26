@@ -18,11 +18,7 @@ public class PostCardItemResponse {
     String id;
     String title;
     BigDecimal nightPrice;
-    String short_description;
     String thumbnail;
     int rating;
-    LocalDateTime createdAt;
-    LocalDateTime updatedAt;
     String city;
-    String fullAddress;
 }

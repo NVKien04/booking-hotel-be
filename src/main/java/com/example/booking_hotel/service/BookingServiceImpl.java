@@ -102,7 +102,6 @@ public class BookingServiceImpl implements BookingService {
         }
         return bookListDate;
     }
-
     private void validateRequest(final BookingCreateRequest request) {
         final var checkinDate = request.getCheckIn();
         final var checkoutDate = request.getCheckOut();
@@ -111,7 +110,6 @@ public class BookingServiceImpl implements BookingService {
         if (checkinDate.isBefore(currentDate) || checkinDate.isAfter(checkoutDate)) {
             throw new AppException(ErrorCode.INVALID_DATES);
         }
-
         if (request.getGuest() <= 0) {
             throw new AppException(ErrorCode.INVALID_DOB);
         }

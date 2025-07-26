@@ -17,7 +17,7 @@ import lombok.NonNull;
 
 @Repository
 public interface PostRepository extends JpaRepository<Posts, String> {
-    Page<Posts> findAll(@NonNull Pageable pageable);
+    Page<Posts> findAll( Pageable pageable);
 
     @Query(
             """
@@ -32,23 +32,23 @@ public interface PostRepository extends JpaRepository<Posts, String> {
 		OR EXISTS (
 			SELECT 1 FROM p.amenities a WHERE a.id IN (:amenitiesList)
 		))
+			
+  AND NOT EXISTS (
+      SELECT 1 FROM PostsAvailability d
+      WHERE d.post = p
+      AND d.date BETWEEN :startDate AND :endDate
+  )
 	""")
+
     Page<Posts> filterRoom(
             @Param("city") String city,
             @Param("district") String district,
             @Param("maxPrice") BigDecimal maxPrice,
             @Param("minPrice") BigDecimal minPrice,
-//            @Param("startDate") LocalDate startDate,
-//            @Param("endDate") LocalDate endDate,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
             @Param("amenitiesList") List<String> amenitiesList,
             @Param("roomType") String roomType,
             Pageable pageable);
 }
-//
-//AND ((:startDate IS NULL OR :endDate IS NULL)
-//OR NOT EXISTS (
-//		SELECT 1 FROM PostsAvailability pa
-//				WHERE pa.post = p
-//				AND pa.date BETWEEN :startDate AND :endDate
-//				AND pa.status = IN ('DRAFT', 'LOCK')
-//            ))
+

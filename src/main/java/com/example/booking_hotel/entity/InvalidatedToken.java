@@ -1,5 +1,6 @@
 package com.example.booking_hotel.entity;
 
+import java.time.Instant;
 import java.util.Date;
 
 import jakarta.persistence.Entity;
@@ -17,6 +18,5 @@ import lombok.experimental.FieldDefaults;
 public class InvalidatedToken {
     @Id
     String jwtID;
-
     Date expiryTime;
 }

@@ -22,7 +22,6 @@ import lombok.experimental.FieldDefaults;
 public class PostCreateRequest {
 
     String title;
-    String description;
     String short_description;
     //    String accommodation_type;
     @DecimalMin(value = "0.0", inclusive = false)
@@ -39,4 +38,7 @@ public class PostCreateRequest {
     boolean pet_friendly;
     String placeType;
     List<String> amenity_id = new ArrayList<>();
+    int bedrooms;
+    int bathrooms;
+    int beds;
 }

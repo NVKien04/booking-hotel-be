@@ -1,5 +1,7 @@
 package com.example.booking_hotel.entity;
 
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
@@ -11,6 +13,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
+import org.springframework.cglib.core.Local;
 
 @MappedSuperclass
 @Getter
@@ -23,13 +26,13 @@ public abstract class BaseEntity {
 
     @CreationTimestamp
     @Column(updatable = false)
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
 
     @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    private LocalDate updatedAt;
 
     @Column
-    private LocalDateTime deletedAt;
+    private LocalDate deletedAt;
 
     @Column
     private Boolean isActive = true;

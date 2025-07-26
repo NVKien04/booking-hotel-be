@@ -24,10 +24,6 @@ public class Posts extends BaseEntity {
     User owner;
 
     String title;
-
-    @Column(columnDefinition = "TEXT")
-    String description;
-
     @Column(columnDefinition = "TEXT")
     String short_description;
 
@@ -77,4 +73,7 @@ public class Posts extends BaseEntity {
     String district;
     String city;
     String fullAddress;
+    int bedrooms;
+    int bathrooms;
+    int beds;
 }

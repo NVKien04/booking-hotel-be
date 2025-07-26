@@ -1,6 +1,7 @@
 package com.example.booking_hotel.dto.request.post;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -16,7 +17,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PostSearchRequest {
-
     String district;
     String city;
     BigDecimal maxPrice;
@@ -26,4 +26,7 @@ public class PostSearchRequest {
     LocalDate endDate;
     List<String> amenities;
     String placeType;
+    int bedrooms;
+    int bathrooms;
+    int beds;
 }

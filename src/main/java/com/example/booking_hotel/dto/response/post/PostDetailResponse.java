@@ -22,9 +22,9 @@ import lombok.experimental.FieldDefaults;
 public class PostDetailResponse {
     String id;
     String title;
-    String description;
     String short_description;
     BigDecimal nightPrice;
+    BigDecimal weekendPrice;
     int capacity;
     List<Post_ImgResponse> post_imagesList;
     List<AmenitiesResponse> amenities;
@@ -34,4 +34,7 @@ public class PostDetailResponse {
     int totalReviews;
     List<LocalDate> availableDates;
     String fullAddress;
+    int bedrooms;
+    int bathrooms;
+    int beds;
 }

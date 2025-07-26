@@ -20,20 +20,21 @@ import org.springframework.web.filter.CorsFilter;
 @EnableWebSecurity
 public class SecurityConfig {
     CustomJwtDecoder customJwtDecoder;
-
     private final String[] PUBLIC_ENDPOINTS = {
         "/auth/register",
         "/auth/login",
         "/auth/logout",
         "/post/*",
         "/post/home",
-        "/post/search",
+        "/post/fetchPost",
         "/post/available/*",
         "/img/posts/*",
         "/img/thumbnail_post/*",
         "/img/user/*",
+            "/ws/**",
+            "/topic/**",
+            "/app/**"
     };
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> {}) // ✅ bật CORS đúng cách

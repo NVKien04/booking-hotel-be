@@ -1,6 +1,7 @@
 package com.example.booking_hotel.dto.response.booking;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -20,7 +21,7 @@ import lombok.experimental.FieldDefaults;
 public class BookingResponse {
     UserResponse user;
     LocalDate check_in;
-    LocalDate check_out;
+    LocalDate  check_out;
     BigDecimal totalPrice;
     BigDecimal discount;
     BigDecimal totalAmount;

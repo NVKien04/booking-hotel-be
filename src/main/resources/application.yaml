@@ -3,6 +3,8 @@ server:
   servlet:
     context-path: /api
 spring:
+  jackson:
+    time-zone: UTC
   datasource:
     url: "jdbc:mysql://localhost:3307/bookingClone"
     username: root

@@ -1,11 +1,10 @@
 package com.example.booking_hotel.service;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import org.hibernate.mapping.Array;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -58,26 +57,20 @@ public class PostServiceImpl implements PostService {
     Place_TypeRepository placeTypeRepository;
 
     PostAvailabilityService postAvailabilityService;
-    PostAvailabilityRepository postAvailabilityRepository;
     Post_imgService postImgService;
-
     SecurityUtil securityUtil;
-
     UploadService uploadService;
-
     PostMapper postMapper;
-
     @Override
     @Transactional
     public PostResponse create(PostCreateRequest request) {
         var userId = securityUtil.getCurrentUserId();
         Posts posts = postMapper.toPosts(request);
-        String fullAddress =
-                String.join(", ", request.getStreet(), request.getWard(), request.getDistrict(), request.getCity());
+        List<String> parts = Arrays.asList(request.getStreet(), request.getWard(), request.getDistrict(), request.getCity());
+        String fullAddress = parts.stream().filter(Objects::nonNull).filter(s -> !s.isEmpty()).collect(Collectors.joining(", "));
         User owner = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         posts.setThumbnail(uploadService.uploadFile(request.getThumbnail(), thumbnailPath, "post"));
         List<String> amenityIds = request.getAmenity_id();
-        log.warn(amenityIds.toString());
         Set<Amenities> amenities = new HashSet<>(amenitiesRepository.findAllById(amenityIds));
         posts.setAmenities(amenities);
         posts.setFullAddress(fullAddress);
@@ -106,6 +99,8 @@ public class PostServiceImpl implements PostService {
                 search.getDistrict(),
                 search.getMaxPrice(),
                 search.getMinPrice(),
+                search.getStartDate(),
+                search.getEndDate(),
                 search.getAmenities(),
                 search.getPlaceType(),
                 pageable);
