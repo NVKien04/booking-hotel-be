@@ -2,7 +2,9 @@ package com.example.booking_hotel.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,6 +14,9 @@ import com.example.booking_hotel.entity.Bookings;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Bookings, String> {
+
+    @EntityGraph(attributePaths = {"posts", "user"})
+    Optional<Bookings> findById(String id);
 
     @Query(
             "select b from Bookings b where b.posts.id = :postId and  b.stats = :Status And :newCheckIn < b.checkOut and :newCheckOut > b.checkIn")

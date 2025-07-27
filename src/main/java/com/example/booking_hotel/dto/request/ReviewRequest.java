@@ -1,8 +1,8 @@
-package com.example.booking_hotel.dto.response.reviews;
+package com.example.booking_hotel.dto.request;
 
-import com.example.booking_hotel.dto.response.user.UserResponse;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
-
+import jakarta.persistence.Column;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -12,8 +12,9 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ReviewsResponse {
-    UserResponse user;
+public class ReviewRequest {
     int rating;
+    String bookingID;
+    @Column(columnDefinition = "TEXT")
     String comment;
 }
