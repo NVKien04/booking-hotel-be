@@ -50,7 +50,7 @@ public class Posts extends BaseEntity {
             joinColumns = @JoinColumn(name = "post_id"),
             inverseJoinColumns = @JoinColumn(name = "amenity_id"))
     Set<Amenities> amenities = new HashSet<>();
-    int rating;
+    double rating;
     int totalReviews;
     @PrePersist
     public void ensureActiveIsSet() {
