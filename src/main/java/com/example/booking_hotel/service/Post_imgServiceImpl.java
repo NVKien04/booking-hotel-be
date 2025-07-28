@@ -26,8 +26,6 @@ public class Post_imgServiceImpl implements Post_imgService {
     Post_imagesRepository post_imagesRepository;
     UploadService uploadService;
     PostRepository postRepository;
-    Post_ImgMapper postImgMapper;
-
     @Override
     @Transactional
     public void uploadMultipleImg_Post(MultipartFile[] files, String post_id) {

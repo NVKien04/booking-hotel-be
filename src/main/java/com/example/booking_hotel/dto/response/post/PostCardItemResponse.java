@@ -20,5 +20,4 @@ public class PostCardItemResponse {
     BigDecimal nightPrice;
     String thumbnail;
     int rating;
-    String city;
 }

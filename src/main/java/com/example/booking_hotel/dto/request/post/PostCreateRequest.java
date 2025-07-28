@@ -21,24 +21,35 @@ import lombok.experimental.FieldDefaults;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PostCreateRequest {
 
-    String title;
-    String short_description;
-    //    String accommodation_type;
-    @DecimalMin(value = "0.0", inclusive = false)
-    BigDecimal nightPrice;
+    private String title;
+    String  short_description;
 
-    BigDecimal weekendPrice;
-    MultipartFile thumbnail;
-        MultipartFile[] files;
-    int capacity;
-    String street;
-    String ward;
-    String district;
-    String city;
-    boolean pet_friendly;
-    String placeType;
-    List<String> amenity_id = new ArrayList<>();
-    int bedrooms;
-    int bathrooms;
-    int beds;
+    @DecimalMin(value = "0.0", inclusive = false)
+    private BigDecimal nightPrice;
+
+    private BigDecimal weekendPrice;
+
+    private MultipartFile thumbnail;
+
+    private MultipartFile[] files;
+
+    private int capacity;
+
+    private String addressDetail;
+
+    private String districtId;
+
+    private String cityId;
+
+    private boolean petFriendly;
+
+    private String placeType;
+
+    private List<String> amenityIds = new ArrayList<>();
+
+    private int bedrooms;
+
+    private int bathrooms;
+
+    private int beds;
 }

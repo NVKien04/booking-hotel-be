@@ -3,7 +3,9 @@ package com.example.booking_hotel.service;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import com.example.booking_hotel.entity.*;
 import org.hibernate.mapping.Array;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -21,10 +23,6 @@ import com.example.booking_hotel.dto.response.Pagination;
 import com.example.booking_hotel.dto.response.post.PostCardItemResponse;
 import com.example.booking_hotel.dto.response.post.PostDetailResponse;
 import com.example.booking_hotel.dto.response.post.PostResponse;
-import com.example.booking_hotel.entity.Amenities;
-import com.example.booking_hotel.entity.Place_type;
-import com.example.booking_hotel.entity.Posts;
-import com.example.booking_hotel.entity.User;
 import com.example.booking_hotel.exception.AppException;
 import com.example.booking_hotel.exception.ErrorCode;
 import com.example.booking_hotel.mapper.PostMapper;
@@ -45,42 +43,64 @@ public class PostServiceImpl implements PostService {
     @NonFinal
     @Value("${file.upload-post}")
     String thumbnailPath;
-
     PostRepository postRepository;
-
     BookingService bookingService;
-
     UserRepository userRepository;
-
     AmenitiesRepository amenitiesRepository;
-
     Place_TypeRepository placeTypeRepository;
-
     PostAvailabilityService postAvailabilityService;
     Post_imgService postImgService;
     SecurityUtil securityUtil;
     UploadService uploadService;
     PostMapper postMapper;
+    CityRepository cityRepository;
+    DistrictRepository districtRepository;
     @Override
     @Transactional
     public PostResponse create(PostCreateRequest request) {
-        var userId = securityUtil.getCurrentUserId();
-        Posts posts = postMapper.toPosts(request);
-        List<String> parts = Arrays.asList(request.getStreet(), request.getWard(), request.getDistrict(), request.getCity());
-        String fullAddress = parts.stream().filter(Objects::nonNull).filter(s -> !s.isEmpty()).collect(Collectors.joining(", "));
-        User owner = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        posts.setThumbnail(uploadService.uploadFile(request.getThumbnail(), thumbnailPath, "post"));
-        List<String> amenityIds = request.getAmenity_id();
-        Set<Amenities> amenities = new HashSet<>(amenitiesRepository.findAllById(amenityIds));
-        posts.setAmenities(amenities);
-        posts.setFullAddress(fullAddress);
-        Optional<Place_type> place_type = placeTypeRepository.findById(request.getPlaceType());
-        posts.setPlaceType(place_type.orElse(null));
-        posts.setOwner(owner);
-        var postRs = postRepository.save(posts);
-        postImgService.uploadMultipleImg_Post(request.getFiles(), postRs.getId());
-        return postMapper.toPostResponse(postRs);
+        String userId = securityUtil.getCurrentUserId();
+
+        // Lấy thông tin user
+        User owner = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        // Mapping request sang entity
+        Posts post = postMapper.toPosts(request);
+        post.setOwner(owner);
+
+        City city = cityRepository.findById(request.getCityId()).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
+        District district = districtRepository.findById(request.getDistrictId()).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
+        post.setCity(city);
+        post.setDistrict(district);
+
+        // Xử lý địa chỉ đầy đủ
+        String fullAddress = Stream.of(request.getAddressDetail(), district.getName(), city.getName())
+                .filter(Objects::nonNull)
+                .filter(s -> !s.isBlank())
+                .collect(Collectors.joining(", "));
+        post.setFullAddress(fullAddress);
+
+        // Upload ảnh thumbnail
+        String thumbnailUrl = uploadService.uploadFile(request.getThumbnail(), thumbnailPath, "post");
+        post.setThumbnail(thumbnailUrl);
+
+        // Gán loại chỗ ở
+        placeTypeRepository.findById(request.getPlaceType())
+                .ifPresent(post::setPlaceType);
+
+        // Gán tiện ích (amenities)
+        Set<Amenities> amenities = new HashSet<>(amenitiesRepository.findAllById(request.getAmenityIds()));
+        post.setAmenities(amenities);
+
+        // Lưu bài đăng
+        Posts savedPost = postRepository.save(post);
+
+        // Upload ảnh nhiều
+        postImgService.uploadMultipleImg_Post(request.getFiles(), savedPost.getId());
+
+        return postMapper.toPostResponse(savedPost);
     }
+
 
     @Override
     public ApiResponse<List<PostCardItemResponse>> search(int page, int size, String sort, PostSearchRequest search) {
@@ -95,8 +115,7 @@ public class PostServiceImpl implements PostService {
         }
         Pageable pageable = PageRequest.of(page, size, sortable);
         Page<Posts> pagePosts = postRepository.filterRoom(
-                search.getCity(),
-                search.getDistrict(),
+                search.getCity_slug(),
                 search.getMaxPrice(),
                 search.getMinPrice(),
                 search.getStartDate(),
@@ -120,7 +139,6 @@ public class PostServiceImpl implements PostService {
                 .pagination(pagination)
                 .build();
     }
-
     @Override
     public ApiResponse<PostDetailResponse> getPostDetail(String id) {
         Posts post = postRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));

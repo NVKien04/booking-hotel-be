@@ -21,6 +21,7 @@ import org.springframework.web.filter.CorsFilter;
 public class SecurityConfig {
     CustomJwtDecoder customJwtDecoder;
     private final String[] PUBLIC_ENDPOINTS = {
+            "/payment",
         "/auth/register",
         "/auth/login",
         "/auth/logout",

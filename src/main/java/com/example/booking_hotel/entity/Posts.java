@@ -22,7 +22,6 @@ public class Posts extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     User owner;
-
     String title;
     @Column(columnDefinition = "TEXT")
     String short_description;
@@ -68,10 +67,15 @@ public class Posts extends BaseEntity {
     @JoinColumn(name = "place_type_id", nullable = false)
     Place_type placeType;
 
-    String street;
-    String ward;
-    String district;
-    String city;
+    String addressDetail;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "district_id")
+    District district;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "city_id")
+    City city;
+
     String fullAddress;
     int bedrooms;
     int bathrooms;

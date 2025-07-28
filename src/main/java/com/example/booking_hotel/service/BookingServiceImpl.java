@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.booking_hotel.dto.response.Payment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +44,7 @@ public class BookingServiceImpl implements BookingService {
     BookingMapper bookingMapper;
     SecurityUtil securityUtil;
     PriceService priceService;
+    VnPayService vnPayService;
 
     @Override
     @Transactional
@@ -81,6 +83,7 @@ public class BookingServiceImpl implements BookingService {
         postAvailabilityRepository.saveAll(aDays);
         BookingResponse bookingResponse = bookingMapper.toBookingresponse(bookingRepository.save(bookings));
         bookingResponse.setPostId(post.getId());
+        Payment payment = new Payment();
         return ApiResponse.<BookingResponse>builder()
                 .message("Successfully created booking")
                 .data(bookingResponse)

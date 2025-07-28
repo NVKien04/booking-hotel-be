@@ -20,15 +20,13 @@ public class PostUpdateRequest {
 
     String title;
     String short_description;
-    //    String accommodation_type;
     @DecimalMin(value = "0.0", inclusive = false)
     BigDecimal nightPrice;
     BigDecimal weekendPrice;
     MultipartFile thumbnail;
         MultipartFile[] files;
     int capacity;
-    String street;
-    String ward;
+    String addressDetail;
     String district;
     String city;
     boolean pet_friendly;

@@ -11,10 +11,11 @@ import com.example.booking_hotel.entity.Posts;
 
 @Mapper(
         componentModel = "spring",
-        uses = {Post_ImgMapper.class, AmenitiesMapper.class, ReviewsMapper.class})
+        uses = {Post_ImgMapper.class, CityMapper.class, AmenitiesMapper.class, ReviewsMapper.class})
 public interface PostMapper {
     PostResponse toPostResponse(Posts post);
 
+    @Mapping(target = "city", ignore = true)
     PostCardItemResponse toPostCardItemResponse(Posts post);
 
     @Mapping(target = "owner", ignore = true)
