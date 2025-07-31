@@ -1,4 +1,4 @@
-package com.example.booking_hotel.service;
+package com.example.booking_hotel.service.Impl;
 
 import java.text.ParseException;
 import java.time.Instant;
@@ -6,6 +6,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.UUID;
 
+import com.example.booking_hotel.service.AuthService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -65,7 +66,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse registerRenter(RegisterRequest registerRequest) {
-        if (userRepository.existsByEmail(registerRequest.getEmail())) {
+        if (userRepository.existsByEmail(registerRequest.getUsername())) {
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
         User user = userMapper.mapToUser(registerRequest);
@@ -79,7 +80,7 @@ public class AuthServiceImpl implements AuthService {
 
     public AuthResponse authenticated(LoginRequest loginRequest) {
         User user = userRepository
-                .findByEmail(loginRequest.getEmail())
+                .findByUsername(loginRequest.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticate = passwordEncoder.matches(loginRequest.getPassword(), user.getPassword());
@@ -132,7 +133,6 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException(e);
         }
     }
-
     @Override
     public ApiResponse<Void> logout(String token) throws JOSEException, ParseException {
         var signToken = verifyToken(token, false);

@@ -1,7 +1,6 @@
-package com.example.booking_hotel.service;
+package com.example.booking_hotel.service.Impl;
 
 import com.example.booking_hotel.configuration.VnPayconfig;
-import com.example.booking_hotel.constant.VNPayParams;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

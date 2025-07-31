@@ -1,4 +1,4 @@
-package com.example.booking_hotel.service;
+package com.example.booking_hotel.service.Impl;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.booking_hotel.dto.response.Payment;
+import com.example.booking_hotel.service.BookingService;
+import com.example.booking_hotel.service.PostAvailabilityService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

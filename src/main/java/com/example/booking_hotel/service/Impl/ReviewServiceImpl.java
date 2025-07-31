@@ -1,4 +1,4 @@
-package com.example.booking_hotel.service;
+package com.example.booking_hotel.service.Impl;
 
 import com.example.booking_hotel.configuration.SecurityUtil;
 import com.example.booking_hotel.dto.request.ReviewRequest;
@@ -15,6 +15,7 @@ import com.example.booking_hotel.repository.BookingRepository;
 import com.example.booking_hotel.repository.PostRepository;
 import com.example.booking_hotel.repository.ReviewRepository;
 import com.example.booking_hotel.repository.UserRepository;
+import com.example.booking_hotel.service.ReviewService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

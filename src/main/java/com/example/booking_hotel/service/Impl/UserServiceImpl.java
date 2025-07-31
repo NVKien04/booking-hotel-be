@@ -1,5 +1,6 @@
-package com.example.booking_hotel.service;
+package com.example.booking_hotel.service.Impl;
 
+import com.example.booking_hotel.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

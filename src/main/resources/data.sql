@@ -2,7 +2,6 @@ INSERT INTO place_type (id, name, icon, description) VALUES
 ('hotel', 'Hotel', 'fa-hotel', 'Khách sạn cao cấp'),
   ('homestay', 'Homestay', 'fa-home', 'Nhà nghỉ gia đình'),
  ('apartment', 'Apartment', 'fa-building', 'Căn hộ dịch vụ riêng');
-
 INSERT INTO amenities (id, name, icon) VALUES
                                            (1, 'Wi-fi', 'fa-wifi'),
                                            (2, 'Bếp', 'fa-utensils'),
@@ -14,14 +13,10 @@ INSERT INTO amenities (id, name, icon) VALUES
                                            (8, 'TV', 'fa-tv'),
                                            (9, 'Máy sấy tóc', 'fa-hair-dryer'),
                                            (10, 'Bàn là', 'fa-ir on');
-
-
 INSERT INTO cities (id, name, slug) VALUES
                                         (1, 'Thành phố Hồ Chí Minh', 'ho-chi-minh'),
                                         (2, 'Hà Nội', 'ha-noi'),
                                         (3, 'Đà Nẵng', 'da-nang');
-
-
 
 INSERT INTO districts (id, name, slug, city_id) VALUES
                                                     (1, 'Quận 1', 'quan-1', 1),

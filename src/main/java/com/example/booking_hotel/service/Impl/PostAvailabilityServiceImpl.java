@@ -1,4 +1,4 @@
-package com.example.booking_hotel.service;
+package com.example.booking_hotel.service.Impl;
 
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
@@ -7,6 +7,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.example.booking_hotel.service.PostAvailabilityService;
 import org.springframework.stereotype.Service;
 
 import com.example.booking_hotel.entity.*;

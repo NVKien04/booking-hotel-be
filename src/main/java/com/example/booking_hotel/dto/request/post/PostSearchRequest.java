@@ -17,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PostSearchRequest {
-    String city_slug;
+    String city;
     BigDecimal maxPrice;
     BigDecimal minPrice;
     String guest;

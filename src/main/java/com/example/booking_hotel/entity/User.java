@@ -18,7 +18,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class User extends BaseEntity {
-
+    
     String username;
     String email;
     String password;

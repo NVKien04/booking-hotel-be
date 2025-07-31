@@ -23,6 +23,7 @@ public interface PostRepository extends JpaRepository<Posts, String> {
             """
 	SELECT p FROM Posts p
 	WHERE (:city IS NULL OR p.city.slug = :city)
+	and (:guests IS NULL OR p.capacity >= :guests)
 	AND (:roomType IS NULL OR p.placeType.id = :roomType)
 	AND (:minPrice IS NULL OR p.nightPrice >= :minPrice)
 	AND (:maxPrice IS NULL OR p.nightPrice <= :maxPrice)
@@ -41,6 +42,7 @@ public interface PostRepository extends JpaRepository<Posts, String> {
 
     Page<Posts> filterRoom(
             @Param("city") String city,
+            @Param("guests") String guests,
             @Param("maxPrice") BigDecimal maxPrice,
             @Param("minPrice") BigDecimal minPrice,
             @Param("startDate") LocalDate startDate,

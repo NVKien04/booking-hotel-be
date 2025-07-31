@@ -1,4 +1,4 @@
-package com.example.booking_hotel.service;
+package com.example.booking_hotel.service.Impl;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.example.booking_hotel.entity.*;
-import org.hibernate.mapping.Array;
+import com.example.booking_hotel.service.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -115,7 +115,8 @@ public class PostServiceImpl implements PostService {
         }
         Pageable pageable = PageRequest.of(page, size, sortable);
         Page<Posts> pagePosts = postRepository.filterRoom(
-                search.getCity_slug(),
+                search.getCity(),
+                search.getGuest(),
                 search.getMaxPrice(),
                 search.getMinPrice(),
                 search.getStartDate(),

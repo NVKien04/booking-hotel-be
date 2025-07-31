@@ -16,7 +16,7 @@ spring:
       hibernate:
         format_sql: true
     hibernate:
-      ddl-auto: update # create, create-drop, update, validate, none
+      ddl-auto:  create-drop # create, create-drop, update, validate, none
   sql:
     init:
       mode: never

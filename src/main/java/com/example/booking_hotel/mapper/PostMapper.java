@@ -15,7 +15,6 @@ import com.example.booking_hotel.entity.Posts;
 public interface PostMapper {
     PostResponse toPostResponse(Posts post);
 
-    @Mapping(target = "city", ignore = true)
     PostCardItemResponse toPostCardItemResponse(Posts post);
 
     @Mapping(target = "owner", ignore = true)
