@@ -10,6 +10,7 @@ import com.example.booking_hotel.dto.response.reviews.ReviewsResponse;
 import com.example.booking_hotel.service.AuthService;
 import com.example.booking_hotel.service.ReviewService;
 import com.nimbusds.jose.JOSEException;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -28,7 +29,7 @@ public class ReviewController {
     ReviewService reviewService;
 
     @PostMapping("/create")
-    public ApiResponse<ReviewsResponse> createReview(@RequestBody ReviewRequest reviewRequest) {
+    public ApiResponse<ReviewsResponse> createReview(@Valid @RequestBody ReviewRequest reviewRequest) {
 
         return ApiResponse.<ReviewsResponse>builder()
                 .message("success")

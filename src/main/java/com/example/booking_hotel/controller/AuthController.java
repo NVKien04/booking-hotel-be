@@ -2,10 +2,8 @@ package com.example.booking_hotel.controller;
 
 import java.text.ParseException;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.booking_hotel.dto.request.auth.IntrospectRequest;
 import com.example.booking_hotel.dto.request.auth.LoginRequest;
@@ -27,7 +25,7 @@ public class AuthController {
     AuthService authService;
 
     @PostMapping("/register")
-    ApiResponse<AuthResponse> registerRenter(@RequestBody RegisterRequest registerRequest) {
+    ApiResponse<AuthResponse> registerRenter(@Valid @RequestBody RegisterRequest registerRequest) {
         var token = authService.registerRenter(registerRequest);
 
         return ApiResponse.<AuthResponse>builder()
@@ -37,7 +35,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    ApiResponse<AuthResponse> loginRenter(@RequestBody LoginRequest loginRequest) {
+    ApiResponse<AuthResponse> loginRenter(@Valid @RequestBody LoginRequest loginRequest) {
 
         var auth = authService.authenticated(loginRequest);
         return ApiResponse.<AuthResponse>builder()
@@ -47,13 +45,13 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    ApiResponse<Void> logoutRenter(@RequestBody IntrospectRequest introspectRequest)
+    ApiResponse<Void> logoutRenter(@Valid @RequestBody IntrospectRequest introspectRequest)
             throws ParseException, JOSEException {
         return authService.logout(introspectRequest.getToken());
     }
 
     @PostMapping("/refresh")
-    ApiResponse<AuthResponse> refresh(@RequestBody IntrospectRequest introspectRequest)
+    ApiResponse<AuthResponse> refresh(@Valid @RequestBody IntrospectRequest introspectRequest)
             throws ParseException, JOSEException {
 
         var auth = authService.refreshToken(introspectRequest.getToken());
@@ -61,5 +59,15 @@ public class AuthController {
                 .data(auth)
                 .message("Đăng nhập thành công!f")
                 .build();
+    }
+
+
+    @PostMapping("/outbound/authentication")
+    ApiResponse<AuthResponse> outboundAuthentication(@RequestParam("code") String code){
+        return ApiResponse.<AuthResponse>builder()
+                .data(authService.outboundAuthenticate(code))
+                .message("Success")
+                .build();
+
     }
 }

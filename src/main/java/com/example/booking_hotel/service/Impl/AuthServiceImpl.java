@@ -4,8 +4,12 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Set;
 import java.util.UUID;
 
+import com.example.booking_hotel.dto.request.auth.ExChangeTokenRequest;
+import com.example.booking_hotel.repository.httpClient.OutboundIdentityClient;
+import com.example.booking_hotel.repository.httpClient.OutboundUserClient;
 import com.example.booking_hotel.service.AuthService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -56,6 +60,21 @@ public class AuthServiceImpl implements AuthService {
     protected long VALID_DURATION;
 
     @NonFinal
+    @Value("${outbound.identity.client-id}")
+    protected String CLIENT_ID;
+
+    @NonFinal
+    @Value("${outbound.identity.client-secret}")
+    protected String CLIENT_SECRET;
+
+    @NonFinal
+    @Value("${outbound.identity.redirect-uri}")
+    protected String REDIRECT_URI;
+
+    @NonFinal
+    protected final String GRANT_TYPE = "authorization_code";
+
+    @NonFinal
     @Value("${jwt.refreshable-duration}")
     protected long REFRESHABLE_DURATION;
 
@@ -63,6 +82,8 @@ public class AuthServiceImpl implements AuthService {
     UserMapper userMapper;
     InvalidatedTokenRepository invalidatedToken;
     SecurityUtil securityUtil;
+    OutboundIdentityClient outboundIdentityClient;
+    OutboundUserClient outboundUserClient;
 
     @Override
     public AuthResponse registerRenter(RegisterRequest registerRequest) {
@@ -80,7 +101,7 @@ public class AuthServiceImpl implements AuthService {
 
     public AuthResponse authenticated(LoginRequest loginRequest) {
         User user = userRepository
-                .findByUsername(loginRequest.getUsername())
+                .findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticate = passwordEncoder.matches(loginRequest.getPassword(), user.getPassword());
@@ -119,7 +140,7 @@ public class AuthServiceImpl implements AuthService {
                 .claim("name", user.getUsername())
                 .claim("email", user.getEmail())
                 .claim("avatar", user.getAvatar_img())
-                .claim("role", user.getRole().toString())
+                .claim("role", user.getRole().getDisplayName())
                 .jwtID(UUID.randomUUID().toString())
                 .build();
 
@@ -185,5 +206,53 @@ public class AuthServiceImpl implements AuthService {
         var token = generateToken(user);
 
         return AuthResponse.builder().token(token).authenticated(true).build();
+    }
+
+    @Override
+    public AuthResponse outboundAuthenticate(String code) {
+        try {
+            var response = outboundIdentityClient.exchangeToken(ExChangeTokenRequest.builder()
+                    .code(code)
+                    .clientId(CLIENT_ID)
+                    .clientSecret(CLIENT_SECRET)
+                    .redirectUri(REDIRECT_URI)
+                    .grantType(GRANT_TYPE)
+                    .build());
+
+        var userInfo = outboundUserClient.getUserInfo("json", response.getAccessToken());
+
+
+        User user = userRepository.findByEmail(userInfo.getEmail()).orElseGet(
+
+                () -> userRepository.save(User.builder()
+                                .username(userInfo.getName())
+                                .email(userInfo.getEmail())
+                                .avatar_img(userInfo.getPicture())
+                                .role(Role.RENTER)
+                        .build())
+        );
+
+            log.info("Token response: {}", userInfo);
+            log.info("Token response: {}", user);
+
+            var token = generateToken(user);
+
+
+
+
+            return AuthResponse.builder()
+                    .token(token)
+                    .build();
+        } catch (feign.FeignException.BadRequest e) {
+            log.error("Google từ chối mã code: {}", e.getMessage());
+            throw new RuntimeException("Google xác thực thất bại: Mã code không hợp lệ.");
+        } catch (feign.FeignException e) {
+            log.error("Lỗi Feign khi gọi Google: {}", e.getMessage());
+            throw new RuntimeException("Không thể kết nối tới máy chủ xác thực.");
+        } catch (Exception e) {
+            log.error("Lỗi không xác định: {}", e.getMessage());
+            throw new RuntimeException("Xác thực thất bại.");
+        }
+
     }
 }

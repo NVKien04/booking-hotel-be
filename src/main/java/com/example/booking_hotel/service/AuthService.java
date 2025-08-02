@@ -26,4 +26,6 @@ public interface AuthService {
     SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException;
 
     AuthResponse refreshToken(String refreshToken) throws JOSEException, ParseException;
+
+    AuthResponse outboundAuthenticate(String code);
 }

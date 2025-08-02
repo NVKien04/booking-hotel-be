@@ -25,8 +25,9 @@ public class SecurityConfig {
         "/auth/register",
         "/auth/login",
         "/auth/logout",
-        "/post/*",
+        "/auth/outbound/authentication",
         "/post/home",
+        "/post/*",
         "/post/fetchPost",
         "/post/available/*",
         "/img/posts/*",
@@ -60,7 +61,6 @@ public class SecurityConfig {
         config.setAllowedHeaders(List.of("*"));
         config.setAllowedMethods(List.of("*"));
         config.setExposedHeaders(List.of("Authorization"));
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);

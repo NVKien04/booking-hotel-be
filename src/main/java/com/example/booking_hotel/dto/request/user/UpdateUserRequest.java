@@ -15,8 +15,5 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UpdateUserRequest {
-    String username;
     String password;
-    String phone;
-    LocalDate dob;
 }

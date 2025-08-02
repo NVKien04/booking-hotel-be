@@ -1,23 +1,25 @@
-package com.example.booking_hotel.dto.response;
+package com.example.booking_hotel.exception;
+
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ExceptionResponse {
+public class ErrorResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     Date timestamp;
     int code;
-    String message;
     String path;
+    String error;
+    String message;
 }

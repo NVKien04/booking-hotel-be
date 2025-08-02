@@ -6,6 +6,7 @@ import java.util.List;
 import com.example.booking_hotel.dto.request.booking.BookingCreateRequest;
 import com.example.booking_hotel.dto.response.booking.BookingResponse;
 import com.example.booking_hotel.service.BookingService;
+import jakarta.validation.Valid;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -33,14 +34,14 @@ public class PostAvailabilityController {
     }
 
     @PostMapping("/book-room")
-    public ApiResponse<BookingResponse> bookRoom(@RequestBody BookingCreateRequest req) {
+    public ApiResponse<BookingResponse> bookRoom(@Valid @RequestBody BookingCreateRequest req) {
         var rs = bookingService.createBooking(req);
         notifyLockedDatesChanged(req.getPostID());
         return rs;
     }
 
     @GetMapping("/locked-date/{postId}")
-    public ApiResponse<List<LocalDate>> getLockedDates(@PathVariable String postId) {
+    public ApiResponse<List<LocalDate>> getLockedDates(@Valid @PathVariable String postId) {
         return ApiResponse.<List<LocalDate>>builder()
                 .message("Success")
                 .data(postAvailabilityService.getLockDateList(postId))

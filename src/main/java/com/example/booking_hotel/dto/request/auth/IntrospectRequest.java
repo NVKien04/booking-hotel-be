@@ -1,5 +1,6 @@
 package com.example.booking_hotel.dto.request.auth;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -9,5 +10,6 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class IntrospectRequest {
+    @NotBlank(message = "AccessToken không được để trống")
     String token;
 }

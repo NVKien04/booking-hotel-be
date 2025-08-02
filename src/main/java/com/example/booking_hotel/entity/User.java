@@ -18,13 +18,14 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class User extends BaseEntity {
-    
+        
     String username;
     String email;
     String password;
     String avatar_img;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
     Role role;
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

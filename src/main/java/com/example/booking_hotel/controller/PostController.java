@@ -2,6 +2,7 @@ package com.example.booking_hotel.controller;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +28,7 @@ public class PostController {
     PostService postService;
     @PreAuthorize("hasRole('RENTER')")
     @PostMapping("/create")
-    public ApiResponse<PostResponse> createPost(@ModelAttribute PostCreateRequest postCreateRequest) {
+    public ApiResponse<PostResponse> createPost(@Valid  @ModelAttribute PostCreateRequest postCreateRequest) {
         PostResponse postResponse = postService.create(postCreateRequest);
         return ApiResponse.<PostResponse>builder()
                 .data(postResponse)

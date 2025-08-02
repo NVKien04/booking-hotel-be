@@ -1,12 +1,16 @@
 package com.example.booking_hotel.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum Role {
     RENTER("RENTER"),
-    HOST("HOST");
+    HOST("HOST"),
+    ADMIN("ADMIN");
 
-    private String name;
+    private String displayName;
 
     Role(String name) {
-        this.name = name;
+        this.displayName = displayName;
     }
 }

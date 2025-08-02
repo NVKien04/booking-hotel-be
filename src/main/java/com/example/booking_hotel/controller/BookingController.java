@@ -1,5 +1,6 @@
 package com.example.booking_hotel.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.booking_hotel.dto.request.booking.BookingCreateRequest;
@@ -22,7 +23,7 @@ public class BookingController {
     BookingService bookingService;
 
     @PostMapping("/room")
-    public ApiResponse<BookingResponse> create(@RequestBody BookingCreateRequest bookingCreateRequest) {
+    public ApiResponse<BookingResponse> create(@Valid @RequestBody BookingCreateRequest bookingCreateRequest) {
         return bookingService.createBooking(bookingCreateRequest);
     }
 }
