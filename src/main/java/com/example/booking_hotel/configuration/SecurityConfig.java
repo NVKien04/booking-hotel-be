@@ -21,10 +21,11 @@ import org.springframework.web.filter.CorsFilter;
 public class SecurityConfig {
     CustomJwtDecoder customJwtDecoder;
     private final String[] PUBLIC_ENDPOINTS = {
-            "/payment",
+        "/payment",
         "/auth/register",
         "/auth/login",
         "/auth/logout",
+        "/auth/testEmail",
         "/auth/outbound/authentication",
         "/post/home",
         "/post/*",
@@ -33,10 +34,11 @@ public class SecurityConfig {
         "/img/posts/*",
         "/img/thumbnail_post/*",
         "/img/user/*",
-            "/ws/**",
-            "/topic/**",
-            "/app/**"
+        "/ws/**",
+        "/topic/**",
+        "/app/**"
     };
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> {}) // ✅ bật CORS đúng cách

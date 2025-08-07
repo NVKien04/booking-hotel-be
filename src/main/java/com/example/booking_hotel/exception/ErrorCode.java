@@ -25,6 +25,8 @@ public enum ErrorCode {
     INVALID_GUEST(1016, "Số lượng khác không hợp lệ.", HttpStatus.BAD_REQUEST),
     INVALID_IMG(1017, "File ảnh không hợp lệ.", HttpStatus.BAD_REQUEST),
     ROOM_ALREADY_BOOKED(1015, "Phòng đã được đặt trong thời gian này.", HttpStatus.CONFLICT),
+    INVALID_OLD_PASSWORD(1016, "Mật khẩu sai.", HttpStatus.BAD_REQUEST),
+    PASSWORD_MISMATCH(1016, "Mật khẩu không trùng khớp", HttpStatus.BAD_REQUEST),
     ;
 
     private int code;

@@ -2,7 +2,6 @@ package com.example.booking_hotel.entity;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 
@@ -21,6 +20,7 @@ public class Payments extends BaseEntity {
     @OneToOne
     @JoinColumn(name = "booking_id", unique = true)
     Bookings booking;
+
     String status;
     String method;
     BigDecimal amount;

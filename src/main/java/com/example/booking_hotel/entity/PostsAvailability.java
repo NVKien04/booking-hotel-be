@@ -1,7 +1,6 @@
 package com.example.booking_hotel.entity;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
 
 import jakarta.persistence.*;
@@ -19,7 +18,9 @@ import lombok.experimental.FieldDefaults;
 public class PostsAvailability extends BaseEntity {
     @Column(nullable = false)
     BigDecimal price;
+
     LocalDate date;
+
     @Column(nullable = false)
     String status;
 

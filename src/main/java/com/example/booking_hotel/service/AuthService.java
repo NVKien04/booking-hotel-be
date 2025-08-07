@@ -2,30 +2,37 @@ package com.example.booking_hotel.service;
 
 import java.text.ParseException;
 
-import com.example.booking_hotel.dto.request.auth.IntrospectRequest;
-import com.example.booking_hotel.dto.request.auth.LoginRequest;
-import com.example.booking_hotel.dto.request.auth.RegisterRequest;
+import com.example.booking_hotel.dto.request.auth.*;
 import com.example.booking_hotel.dto.response.ApiResponse;
+import com.example.booking_hotel.dto.response.TokenResponse;
 import com.example.booking_hotel.dto.response.auth.AuthResponse;
 import com.example.booking_hotel.dto.response.auth.IntrospectResponse;
 import com.example.booking_hotel.entity.User;
+import com.example.booking_hotel.enums.TokenType;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jwt.SignedJWT;
 
-public interface AuthService {
-    AuthResponse registerRenter(RegisterRequest registerRequest);
+public interface
+AuthService {
+    TokenResponse registerRenter(RegisterRequest registerRequest);
 
-    AuthResponse authenticated(LoginRequest loginRequest);
+    TokenResponse authenticated(LoginRequest loginRequest);
 
     IntrospectResponse introspectResponse(IntrospectRequest introspectRequest) throws JOSEException, ParseException;
 
-    String generateToken(User user);
+    ApiResponse<Void> logout(LogoutTokenRequest logoutTokenRequest) throws JOSEException, ParseException;
 
-    ApiResponse<Void> logout(String token) throws JOSEException, ParseException;
+    TokenResponse outboundAuthenticate(String code);
 
-    SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException;
+    void ChangePassword(ChangePasswordRequest changePasswordRequest);
 
-    AuthResponse refreshToken(String refreshToken) throws JOSEException, ParseException;
+    void saveRefreshToken(String token);
 
-    AuthResponse outboundAuthenticate(String code);
+    String generateToken(User user, TokenType tokenType);
+
+    TokenResponse refreshToken(String refreshToken) throws JOSEException, ParseException;
+
+    SignedJWT verifyToken(String token, TokenType tokenType) throws JOSEException, ParseException;
+
+    TokenResponse generateTokenAndSave(User user);
 }

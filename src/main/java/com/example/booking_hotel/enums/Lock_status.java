@@ -15,5 +15,4 @@ public enum Lock_status {
         this.code = code;
         this.displayName = displayName;
     }
-
 }

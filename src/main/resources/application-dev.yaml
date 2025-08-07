@@ -1,0 +1,39 @@
+jwt:
+  signerKey: "ISaeBKjUzdPg8OWFRm5Cq42I4XZlefm2s/6nxKOpC+j8aHQ16dYfX6ON6AAfu3Te"
+  valid-duration: 60
+  refreshable-duration: 120
+
+outbound:
+  identity:
+    client-id: "187643815788-fo1fdknvjs4aapldvj6hd3dvik4hhd6v.apps.googleusercontent.com"
+    client-secret: ${GOOGLE_CLIENT_SECRET}
+    redirect-uri: "http://localhost:3000/api/auth/google"
+
+vnpay:
+  tmn-code: YOUR_TMN_CODE
+  hash-secret: YOUR_HASH_SECRET
+  pay-url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+  return-url: http://localhost:8080/payment/return
+  version: 2.1.0
+  command: pay
+  currency: VND
+  locale: vn
+
+spring:
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: "nguyenvankien2004hanam@gmail.com"
+    password: "owye gimp aymj jowc"
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_SMTP_AUTH:true}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS_ENABLE:true}
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:123456}

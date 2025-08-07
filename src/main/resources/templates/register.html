@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chào mừng đến với DevJob</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #FF5A5F;
+            font-size: 28px;
+            margin: 0;
+        }
+
+        .content {
+            font-size: 16px;
+            color: #484848;
+            line-height: 1.6;
+        }
+
+        .button {
+            display: inline-block;
+            margin-top: 25px;
+            background-color: #FF5A5F;
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .button:hover {
+            background-color: #e0484d;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #aaa;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Chào mừng!</h1>
+    </div>
+
+    <div class="content">
+        <p>Xin chào <strong th:text="${username}">Người dùng</strong>,</p>
+        <p>Chúng tôi rất vui khi bạn đã gia nhập nền tảng Airbnb.</p>
+        <p>Hãy bắt đầu khám phá và tìm kiếm những trải nghiệm phù hợp nhất với bạn.</p>
+
+        <a href="https://your-domain.com/login" class="button">Đăng nhập ngay</a>
+    </div>
+
+    <div class="footer">
+        © 2025 DevJob. All rights reserved.
+    </div>
+</div>
+</body>
+</html>

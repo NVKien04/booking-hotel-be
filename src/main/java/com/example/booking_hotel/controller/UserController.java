@@ -1,5 +1,6 @@
 package com.example.booking_hotel.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,6 +15,8 @@ import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @AllArgsConstructor
@@ -26,12 +29,9 @@ public class UserController {
 
     @GetMapping("/me")
     private ApiResponse<UserResponse> getInfoUser() {
-
         var userId = securityUtil.getCurrentUserId();
         log.warn(userId);
-
-        var user = userService.getInfoUser(userId);
-
+        var user = userService.getInfoUser();
         return ApiResponse.<UserResponse>builder()
                 .data(user)
                 .message("User Info")
@@ -46,5 +46,15 @@ public class UserController {
                 .message("Add Avatar")
                 .data(userService.addAvatar(userId, file))
                 .build();
+    }
+
+
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/fetchAllUser")
+    private ApiResponse<List<UserResponse>> fetchAllUser(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "8") int size) {
+        var userId = securityUtil.getCurrentUserId();
+        log.warn(userId);
+        return userService.getAllUser(page, size);
     }
 }

@@ -1,36 +1,41 @@
 package com.example.booking_hotel.service.Impl;
 
 import java.text.ParseException;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.Set;
 import java.util.UUID;
 
-import com.example.booking_hotel.dto.request.auth.ExChangeTokenRequest;
-import com.example.booking_hotel.repository.httpClient.OutboundIdentityClient;
-import com.example.booking_hotel.repository.httpClient.OutboundUserClient;
-import com.example.booking_hotel.service.AuthService;
+import com.example.booking_hotel.dto.request.auth.*;
+import com.example.booking_hotel.dto.response.ApiResponse;
+import com.example.booking_hotel.dto.response.TokenResponse;
+import com.example.booking_hotel.entity.RedisRevokedToken;
+import com.example.booking_hotel.entity.RefreshToken;
+import com.example.booking_hotel.enums.TokenType;
+import com.example.booking_hotel.repository.RefreshTokenRepository;
+import com.example.booking_hotel.repository.RevokedTokenCodeRepository;
+import com.example.booking_hotel.service.EmailService;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.booking_hotel.configuration.SecurityUtil;
-import com.example.booking_hotel.dto.request.auth.IntrospectRequest;
-import com.example.booking_hotel.dto.request.auth.LoginRequest;
-import com.example.booking_hotel.dto.request.auth.RegisterRequest;
-import com.example.booking_hotel.dto.response.ApiResponse;
 import com.example.booking_hotel.dto.response.auth.AuthResponse;
 import com.example.booking_hotel.dto.response.auth.IntrospectResponse;
-import com.example.booking_hotel.entity.InvalidatedToken;
 import com.example.booking_hotel.entity.User;
+import com.example.booking_hotel.enums.AccountStatus;
 import com.example.booking_hotel.enums.Role;
 import com.example.booking_hotel.exception.AppException;
 import com.example.booking_hotel.exception.ErrorCode;
 import com.example.booking_hotel.mapper.UserMapper;
-import com.example.booking_hotel.repository.InvalidatedTokenRepository;
 import com.example.booking_hotel.repository.UserRepository;
+import com.example.booking_hotel.repository.httpClient.OutboundIdentityClient;
+import com.example.booking_hotel.repository.httpClient.OutboundUserClient;
+import com.example.booking_hotel.service.AuthService;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -42,6 +47,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -49,11 +55,34 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthServiceImpl implements AuthService {
 
-    private final InvalidatedTokenRepository invalidatedTokenRepository;
+    RevokedTokenCodeRepository revokedTokenCodeRepository;
+    RefreshTokenRepository refreshTokenRepository;
+
+
+    @NonFinal
+    @Value("${jwt.refreshKey}")
+    private String REFRESH_KEY;
+
+    @NonFinal
+    @Value("${jwt.refresh-token.expiry-in-days}")//20
+    private long refreshTokenExpiration;
+
+
+    @NonFinal
+    @Value("${jwt.resetKey}")
+    private String RESET_KEY;
+
+    @NonFinal
+    @Value("${jwt.reset.expiry-in-minutes}")//15
+    private long resetTokenExpiration;
 
     @NonFinal
     @Value("${jwt.signerKey}")
     private String SIGNER_KEY;
+
+    @NonFinal
+    @Value("${jwt.access-token.expiry-in-minutes}")//15
+    private long accessTokenExpiration;
 
     @NonFinal
     @Value("${jwt.valid-duration}")
@@ -80,26 +109,29 @@ public class AuthServiceImpl implements AuthService {
 
     UserRepository userRepository;
     UserMapper userMapper;
-    InvalidatedTokenRepository invalidatedToken;
     SecurityUtil securityUtil;
     OutboundIdentityClient outboundIdentityClient;
     OutboundUserClient outboundUserClient;
+    EmailService emailService;
 
+    @Transactional
     @Override
-    public AuthResponse registerRenter(RegisterRequest registerRequest) {
-        if (userRepository.existsByEmail(registerRequest.getUsername())) {
+    public TokenResponse registerRenter(RegisterRequest registerRequest) {
+        if (userRepository.existsByEmail(registerRequest.getEmail())) {
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
         User user = userMapper.mapToUser(registerRequest);
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRole(Role.RENTER);
+        user.setStatus(AccountStatus.UNVERIFIED);
         var rs = userRepository.save(user);
-        var token = generateToken(rs);
-        return AuthResponse.builder().authenticated(true).token(token).build();
+        emailService.senEmailUserWithRegister(user);
+        return generateTokenAndSave(rs);// vd hàm này thực hiện thành công
     }
 
-    public AuthResponse authenticated(LoginRequest loginRequest) {
+    @Transactional
+    public TokenResponse authenticated(LoginRequest loginRequest) {
         User user = userRepository
                 .findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -108,38 +140,58 @@ public class AuthServiceImpl implements AuthService {
         if (!authenticate) {
             throw new AppException(ErrorCode.BAD_CREDENTIALS);
         }
-        var token = generateToken(user);
-        return AuthResponse.builder().authenticated(true).token(token).build();
+        return  generateTokenAndSave(user);
     }
 
+    @Transactional
     public IntrospectResponse introspectResponse(IntrospectRequest introspectRequest) {
 
         String token = introspectRequest.getToken().toString();
 
         boolean invalidated = true;
 
-        try {
-            verifyToken(token, false);
-        } catch (JOSEException | AppException | ParseException e) {
+
+            try {
+                verifyToken(token, TokenType.ACCESS_TOKEN);    } catch (JOSEException | AppException | ParseException e) {
             invalidated = false;
         }
 
         return IntrospectResponse.builder().valid(invalidated).build();
     }
 
-    public String generateToken(User user) {
+
+
+    private  String getKey (TokenType tokenType){
+        switch (tokenType){
+            case ACCESS_TOKEN -> {return SIGNER_KEY;}
+            case REFRESH_TOKEN -> {return REFRESH_KEY;}
+            case RESET_PASSWORD_TOKEN -> {return RESET_KEY;}
+            default -> throw new AppException(ErrorCode.BAD_CREDENTIALS);
+        }
+    }
+
+    private long getDurationByToken(TokenType type) {
+        switch (type) {
+            case ACCESS_TOKEN -> {return Duration.ofMinutes(accessTokenExpiration).getSeconds();}
+            case REFRESH_TOKEN -> {return Duration.ofDays(refreshTokenExpiration).getSeconds();}
+            case RESET_PASSWORD_TOKEN -> {return Duration.ofMinutes(resetTokenExpiration).getSeconds();}
+            default -> throw new AppException(ErrorCode.BAD_CREDENTIALS);
+        }
+    }
+
+    public String generateToken(User user, TokenType tokenType) {
 
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
+
+        long durationInSeconds = getDurationByToken(tokenType);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getEmail())
                 .issuer("bookingClone")
                 .issueTime(new Date())
                 .expirationTime(
-                        new Date(Instant.now().plus(3600, ChronoUnit.SECONDS).toEpochMilli()))
+                        new Date(Instant.now().plus(durationInSeconds, ChronoUnit.SECONDS).toEpochMilli()))
                 .claim("id", user.getId())
-                .claim("name", user.getUsername())
                 .claim("email", user.getEmail())
-                .claim("avatar", user.getAvatar_img())
                 .claim("role", user.getRole().getDisplayName())
                 .jwtID(UUID.randomUUID().toString())
                 .build();
@@ -148,68 +200,73 @@ public class AuthServiceImpl implements AuthService {
 
         JWSObject jwsObject = new JWSObject(jwsHeader, payload);
         try {
-            jwsObject.sign(new MACSigner(SIGNER_KEY));
+            jwsObject.sign(new MACSigner(getKey(tokenType)));
             return jwsObject.serialize();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-    @Override
-    public ApiResponse<Void> logout(String token) throws JOSEException, ParseException {
-        var signToken = verifyToken(token, false);
 
-        String jid = signToken.getJWTClaimsSet().getJWTID();
+    @Override
+    public ApiResponse<Void> logout(LogoutTokenRequest logoutTokenRequest) throws JOSEException, ParseException {
+        var signToken = verifyToken(logoutTokenRequest.getAccessToken(), TokenType.ACCESS_TOKEN);
+
+        String email = signToken.getJWTClaimsSet().getSubject();
         Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
-        InvalidatedToken invalidatedToken =
-                InvalidatedToken.builder().jwtID(jid).expiryTime(expiryTime).build();
-        invalidatedTokenRepository.save(invalidatedToken);
+
+        RedisRevokedToken redisRevokedToken = RedisRevokedToken.builder()
+                .accessToken(logoutTokenRequest.getAccessToken())
+                .email(email)
+                .expiryTime(expiryTime)
+                .ttl((expiryTime.getTime() - System.currentTimeMillis()) / 1000)
+                .build();
+        revokedTokenCodeRepository.save(redisRevokedToken);
         return ApiResponse.<Void>builder().message("logged out successfully").build();
     }
 
     @Override
-    public SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
-        JWSVerifier jwsVerifier = new MACVerifier(SIGNER_KEY.getBytes());
+    public SignedJWT verifyToken(String token, TokenType tokenType) throws JOSEException, ParseException {
+        JWSVerifier jwsVerifier = new MACVerifier(getKey(tokenType));
         SignedJWT signedJWT = SignedJWT.parse(token);
 
-        Date expiryTime = (isRefresh)
-                ? new Date(signedJWT
-                        .getJWTClaimsSet()
-                        .getIssueTime()
-                        .toInstant()
-                        .plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS)
-                        .toEpochMilli())
-                : signedJWT.getJWTClaimsSet().getExpirationTime();
+        Date expiryTime =  signedJWT.getJWTClaimsSet().getExpirationTime();
 
         var verified = signedJWT.verify(jwsVerifier);
 
         if (!verified || expiryTime.before(new Date())) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
-        if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
+        if(tokenType.equals(TokenType.ACCESS_TOKEN) &&  revokedTokenCodeRepository.existsById(token)){
             throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        if(tokenType.equals(TokenType.REFRESH_TOKEN) &&  !refreshTokenRepository.existsByRefreshToken(token)){
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+        }
         return SignedJWT.parse(token);
     }
 
     @Override
-    public AuthResponse refreshToken(String refreshToken) throws JOSEException, ParseException {
+    public TokenResponse refreshToken(String refreshToken) throws JOSEException, ParseException {
 
-        var signJWT = verifyToken(refreshToken, true);
+        var signJWT = verifyToken(refreshToken, TokenType.REFRESH_TOKEN);
         var jit = signJWT.getJWTClaimsSet().getJWTID();
         var expiryTime = signJWT.getJWTClaimsSet().getExpirationTime();
-        InvalidatedToken invalidatedToken =
-                InvalidatedToken.builder().jwtID(jit).expiryTime(expiryTime).build();
-
-        invalidatedTokenRepository.save(invalidatedToken);
         var userEmail = signJWT.getJWTClaimsSet().getSubject();
         User user =
                 userRepository.findByEmail(userEmail).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        var token = generateToken(user);
+        var token = generateToken(user,TokenType.ACCESS_TOKEN);
 
-        return AuthResponse.builder().token(token).authenticated(true).build();
+        return TokenResponse.builder().
+                 accessToken(token)
+                .refreshToken(refreshToken)
+                .email(user.getEmail())
+                .build();
     }
 
     @Override
-    public AuthResponse outboundAuthenticate(String code) {
+    public TokenResponse outboundAuthenticate(String code) {
         try {
             var response = outboundIdentityClient.exchangeToken(ExChangeTokenRequest.builder()
                     .code(code)
@@ -219,30 +276,25 @@ public class AuthServiceImpl implements AuthService {
                     .grantType(GRANT_TYPE)
                     .build());
 
-        var userInfo = outboundUserClient.getUserInfo("json", response.getAccessToken());
+            log.warn(CLIENT_SECRET);
+            log.warn(CLIENT_ID);
+            log.warn(REDIRECT_URI);
+            var userInfo = outboundUserClient.getUserInfo("json", response.getAccessToken());
 
-
-        User user = userRepository.findByEmail(userInfo.getEmail()).orElseGet(
-
-                () -> userRepository.save(User.builder()
-                                .username(userInfo.getName())
-                                .email(userInfo.getEmail())
-                                .avatar_img(userInfo.getPicture())
-                                .role(Role.RENTER)
-                        .build())
-        );
+            User user = userRepository
+                    .findByEmail(userInfo.getEmail())
+                    .orElseGet(() -> userRepository.save(User.builder()
+                            .username(userInfo.getName())
+                            .email(userInfo.getEmail())
+                            .avatar_img(userInfo.getPicture())
+                            .role(Role.RENTER)
+                            .status(AccountStatus.VERIFIED)
+                            .build()));
 
             log.info("Token response: {}", userInfo);
             log.info("Token response: {}", user);
 
-            var token = generateToken(user);
-
-
-
-
-            return AuthResponse.builder()
-                    .token(token)
-                    .build();
+            return generateTokenAndSave(user);
         } catch (feign.FeignException.BadRequest e) {
             log.error("Google từ chối mã code: {}", e.getMessage());
             throw new RuntimeException("Google xác thực thất bại: Mã code không hợp lệ.");
@@ -253,6 +305,45 @@ public class AuthServiceImpl implements AuthService {
             log.error("Lỗi không xác định: {}", e.getMessage());
             throw new RuntimeException("Xác thực thất bại.");
         }
-
     }
+
+    @Override
+    public void ChangePassword(ChangePasswordRequest changePasswordRequest) {
+        String userId = securityUtil.getCurrentUserId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        boolean authenticate = passwordEncoder.matches(changePasswordRequest.getOldPassword(), user.getPassword());
+        if (!authenticate) {
+            throw new AppException(ErrorCode.INVALID_OLD_PASSWORD);
+        }
+        if(!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmPassword())) {
+            throw new AppException(ErrorCode.PASSWORD_MISMATCH);
+        }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(user);
+    }
+
+    @Override
+    public TokenResponse generateTokenAndSave(User user) {
+        String accessToken = generateToken(user, TokenType.ACCESS_TOKEN);
+        String refreshToken = generateToken(user, TokenType.REFRESH_TOKEN);//hàm này có lỗi thì có rollback không
+        saveRefreshToken(refreshToken);
+        return TokenResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .email(user.getEmail())
+                .build();
+    }
+
+    @Override
+    public void saveRefreshToken(String token) {
+
+        RefreshToken refreshToken = RefreshToken.builder()
+                .refreshToken(token)
+                .expiryTime(LocalDateTime.now().plusDays(refreshTokenExpiration))
+                .build();
+        refreshTokenRepository.save(refreshToken);
+    }
+
+
 }

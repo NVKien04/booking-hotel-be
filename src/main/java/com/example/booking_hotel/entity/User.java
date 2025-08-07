@@ -5,6 +5,7 @@ import java.util.List;
 
 import jakarta.persistence.*;
 
+import com.example.booking_hotel.enums.AccountStatus;
 import com.example.booking_hotel.enums.Role;
 
 import lombok.*;
@@ -18,7 +19,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class User extends BaseEntity {
-        
+
     String username;
     String email;
     String password;
@@ -27,6 +28,9 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     Role role;
+
+    @Enumerated(EnumType.STRING)
+    AccountStatus status;
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     List<Posts> post = new ArrayList<>();

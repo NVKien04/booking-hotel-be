@@ -1,5 +1,8 @@
 package com.example.booking_hotel.service.Impl;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.example.booking_hotel.configuration.SecurityUtil;
 import com.example.booking_hotel.dto.request.ReviewRequest;
 import com.example.booking_hotel.dto.response.reviews.ReviewsResponse;
@@ -16,11 +19,10 @@ import com.example.booking_hotel.repository.PostRepository;
 import com.example.booking_hotel.repository.ReviewRepository;
 import com.example.booking_hotel.repository.UserRepository;
 import com.example.booking_hotel.service.ReviewService;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -39,19 +41,20 @@ public class ReviewServiceImpl implements ReviewService {
     public ReviewsResponse createReviews(ReviewRequest reviewRequest) {
         var userId = securityUtil.getCurrentUserId();
 
-        Bookings booking = bookingRepository.findById(reviewRequest.getBookingID())
+        Bookings booking = bookingRepository
+                .findById(reviewRequest.getBookingID())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         // Kiểm tra trạng thái booking và người tạo
-        if (!Booking_status.DRAFT.getCode().equals(booking.getStats()) ||
-                !userId.equals(booking.getUser().getId())) {
+        if (!Booking_status.DRAFT.getCode().equals(booking.getStats())
+                || !userId.equals(booking.getUser().getId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
         // Lấy thông tin user và post
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        Posts post = postRepository.findById(booking.getPosts().getId())
+        User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        Posts post = postRepository
+                .findById(booking.getPosts().getId())
                 .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
 
         // Tạo review mới

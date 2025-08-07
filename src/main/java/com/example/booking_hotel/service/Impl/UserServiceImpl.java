@@ -1,7 +1,12 @@
 package com.example.booking_hotel.service.Impl;
 
-import com.example.booking_hotel.service.UserService;
+import com.example.booking_hotel.configuration.SecurityUtil;
+import com.example.booking_hotel.dto.response.ApiResponse;
+import com.example.booking_hotel.dto.response.Pagination;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,16 +17,22 @@ import com.example.booking_hotel.exception.AppException;
 import com.example.booking_hotel.exception.ErrorCode;
 import com.example.booking_hotel.mapper.UserMapper;
 import com.example.booking_hotel.repository.UserRepository;
+import com.example.booking_hotel.service.UserService;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserServiceImpl implements UserService {
+    SecurityUtil securityUtil;
     UserRepository userRepository;
     UploadService uploadService;
     UserMapper userMapper;
@@ -31,9 +42,37 @@ public class UserServiceImpl implements UserService {
     String UPLOAD_USER;
 
     @Override
-    public UserResponse getInfoUser(String userId) {
+    public UserResponse getInfoUser() {
+        String userId = securityUtil.getCurrentUserId();
         User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         return userMapper.mapToUserResponse(user);
+    }
+
+    @Override
+    public ApiResponse<List<UserResponse>> getAllUser(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<User> userPage = userRepository.findAll(pageable);
+
+        if (userPage.isEmpty()) {
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        }
+
+        List<UserResponse> userResponses = userPage.getContent().stream()
+                .map(userMapper::mapToUserResponse)
+                .toList();
+
+        Pagination pagination = Pagination.builder()
+                .page(page)
+                .limit(size)
+                .totalPages(userPage.getTotalPages())
+                .totalRecords(userPage.getTotalElements())
+                .build();
+
+        return ApiResponse.<List<UserResponse>>builder()
+                .message("Success")
+                .data(userResponses)
+                .pagination(pagination)
+                .build();
     }
 
     @Override

@@ -1,8 +1,5 @@
 package com.example.booking_hotel.dto.request.user;
 
-import java.time.Instant;
-import java.time.LocalDate;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.*;

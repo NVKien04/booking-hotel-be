@@ -3,7 +3,9 @@ package com.example.booking_hotel;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
+@EnableScheduling
 @SpringBootApplication
 @EnableFeignClients(basePackages = "com.example.booking_hotel.repository")
 public class BookingHotelApplication {

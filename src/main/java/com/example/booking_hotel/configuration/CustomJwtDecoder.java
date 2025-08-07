@@ -21,9 +21,12 @@ import com.nimbusds.jose.JOSEException;
 public class CustomJwtDecoder implements JwtDecoder {
     @Value("${jwt.signerKey}")
     private String signerKey;
+
     @Autowired
     private AuthService authService;
+
     private NimbusJwtDecoder nimbusJwtDecoder = null;
+
     @Override
     public Jwt decode(String token) throws JwtException {
         try {

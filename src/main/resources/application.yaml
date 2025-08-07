@@ -22,8 +22,16 @@ spring:
       mode: never
 jwt:
   signerKey: "ISaeBKjUzdPg8OWFRm5Cq42I4XZlefm2s/6nxKOpC+j8aHQ16dYfX6ON6AAfu3Te"
+  refreshKey: "LYjGvnymaVpFeBWmNa9em47aXL5kO52iIgROR0Er8Bs4shXCcR6KjkmDzLMOAFEA"
+  resetKey: "zAK73Omd9luql0y7QKPeQbrXaNbsD69ityClw3JKxeZd3zXC2v7bF2fCCrfqnmcT"
   valid-duration: 60
   refreshable-duration: 120
+  access-token:
+    expiry-in-minutes: ${JWT_ACCESS_TOKEN_IN_MINUTES:15}
+  refresh-token:
+    expiry-in-days: ${JWT_REFRESH_TOKEN_IN_DAYS:20}
+  reset:
+    expiry-in-minutes: ${JWT_RESET_TOKEN_IN_MINUTES:15}
 
 outbound:
   identity:
@@ -46,3 +54,11 @@ vnpay:
     command: pay
     currency: VND
     locale: vn
+
+  # Redis
+    data:
+      redis:
+        host: ${REDIS_HOST:localhost}
+        port: ${REDIS_PORT:6379}
+        password: ${REDIS_PASSWORD:123456}
+

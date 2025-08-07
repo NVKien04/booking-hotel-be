@@ -7,7 +7,6 @@ public class DobValidator implements ConstraintValidator<DobConstraint, Object> 
 
     private int min;
 
-
     @Override
     public void initialize(DobConstraint constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
@@ -15,7 +14,8 @@ public class DobValidator implements ConstraintValidator<DobConstraint, Object> 
     }
 
     @Override
-    public boolean isValid(Object o, ConstraintValidatorContext constraintValidatorContext) { //Hàm xử lý data có đúng hay không
+    public boolean isValid(
+            Object o, ConstraintValidatorContext constraintValidatorContext) { // Hàm xử lý data có đúng hay không
 
         return false;
     }

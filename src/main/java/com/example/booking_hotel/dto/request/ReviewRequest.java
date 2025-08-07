@@ -1,8 +1,9 @@
 package com.example.booking_hotel.dto.request;
 
+import jakarta.persistence.Column;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.persistence.Column;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -15,6 +16,7 @@ import lombok.experimental.FieldDefaults;
 public class ReviewRequest {
     int rating;
     String bookingID;
+
     @Column(columnDefinition = "TEXT")
     String comment;
 }

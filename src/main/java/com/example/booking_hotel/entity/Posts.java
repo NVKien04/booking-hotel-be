@@ -22,7 +22,9 @@ public class Posts extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     User owner;
+
     String title;
+
     @Column(columnDefinition = "TEXT")
     String short_description;
 
@@ -49,14 +51,17 @@ public class Posts extends BaseEntity {
             joinColumns = @JoinColumn(name = "post_id"),
             inverseJoinColumns = @JoinColumn(name = "amenity_id"))
     Set<Amenities> amenities = new HashSet<>();
+
     double rating;
     int totalReviews;
+
     @PrePersist
     public void ensureActiveIsSet() {
         if (available == null) {
             available = true;
         }
     }
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     List<Reviews> reviews = new ArrayList<>();
 
@@ -68,6 +73,7 @@ public class Posts extends BaseEntity {
     Place_type placeType;
 
     String addressDetail;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "district_id")
     District district;

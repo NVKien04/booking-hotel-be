@@ -2,6 +2,7 @@ package com.example.booking_hotel.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import com.example.booking_hotel.dto.request.post.PostCreateRequest;
 import com.example.booking_hotel.dto.request.post.PostSearchRequest;
@@ -18,8 +19,9 @@ public interface PostService {
 
     public ApiResponse<PostDetailResponse> getPostDetail(String id);
 
-    public List<LocalDate> getSelectDates(String id);
+    public void deletePost(String ids);
+
+    public void deleteMultiplePosts(Set<String> ids);
 
     public ApiResponse<List<PostCardItemResponse>> getPostCardItems(int page, int size);
 }
-    

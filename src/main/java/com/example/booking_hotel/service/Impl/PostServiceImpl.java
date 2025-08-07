@@ -5,8 +5,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.example.booking_hotel.entity.*;
-import com.example.booking_hotel.service.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,10 +21,12 @@ import com.example.booking_hotel.dto.response.Pagination;
 import com.example.booking_hotel.dto.response.post.PostCardItemResponse;
 import com.example.booking_hotel.dto.response.post.PostDetailResponse;
 import com.example.booking_hotel.dto.response.post.PostResponse;
+import com.example.booking_hotel.entity.*;
 import com.example.booking_hotel.exception.AppException;
 import com.example.booking_hotel.exception.ErrorCode;
 import com.example.booking_hotel.mapper.PostMapper;
 import com.example.booking_hotel.repository.*;
+import com.example.booking_hotel.service.*;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +43,7 @@ public class PostServiceImpl implements PostService {
     @NonFinal
     @Value("${file.upload-post}")
     String thumbnailPath;
+
     PostRepository postRepository;
     BookingService bookingService;
     UserRepository userRepository;
@@ -55,21 +56,25 @@ public class PostServiceImpl implements PostService {
     PostMapper postMapper;
     CityRepository cityRepository;
     DistrictRepository districtRepository;
+
     @Override
     @Transactional
     public PostResponse create(PostCreateRequest request) {
         String userId = securityUtil.getCurrentUserId();
 
         // Lấy thông tin user
-        User owner = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        User owner = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         // Mapping request sang entity
         Posts post = postMapper.toPosts(request);
         post.setOwner(owner);
 
-        City city = cityRepository.findById(request.getCityId()).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
-        District district = districtRepository.findById(request.getDistrictId()).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
+        City city = cityRepository
+                .findById(request.getCityId())
+                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
+        District district = districtRepository
+                .findById(request.getDistrictId())
+                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
         post.setCity(city);
         post.setDistrict(district);
 
@@ -85,8 +90,7 @@ public class PostServiceImpl implements PostService {
         post.setThumbnail(thumbnailUrl);
 
         // Gán loại chỗ ở
-        placeTypeRepository.findById(request.getPlaceType())
-                .ifPresent(post::setPlaceType);
+        placeTypeRepository.findById(request.getPlaceType()).ifPresent(post::setPlaceType);
 
         // Gán tiện ích (amenities)
         Set<Amenities> amenities = new HashSet<>(amenitiesRepository.findAllById(request.getAmenityIds()));
@@ -100,7 +104,6 @@ public class PostServiceImpl implements PostService {
 
         return postMapper.toPostResponse(savedPost);
     }
-
 
     @Override
     public ApiResponse<List<PostCardItemResponse>> search(int page, int size, String sort, PostSearchRequest search) {
@@ -140,6 +143,7 @@ public class PostServiceImpl implements PostService {
                 .pagination(pagination)
                 .build();
     }
+
     @Override
     public ApiResponse<PostDetailResponse> getPostDetail(String id) {
         Posts post = postRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
@@ -153,9 +157,22 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<LocalDate> getSelectDates(String id) {
-        return bookingService.getAvailableDate(id);
+    public void deletePost(String id) {
+        Posts post = postRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
+        postRepository.delete(post);
+
     }
+
+    @Override
+    public void deleteMultiplePosts(Set<String> ids) {
+            Set<Posts> posts = new HashSet<>(postRepository.findAllById(ids));
+            if(posts.isEmpty()) {
+                throw new AppException(ErrorCode.POST_NOT_EXISTED);
+
+            }
+        postRepository.deleteAll(posts);
+    }
+
 
     @Override
     public ApiResponse<List<PostCardItemResponse>> getPostCardItems(int page, int size) {

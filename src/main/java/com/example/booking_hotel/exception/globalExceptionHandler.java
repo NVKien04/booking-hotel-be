@@ -1,7 +1,12 @@
 package com.example.booking_hotel.exception;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -11,13 +16,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-
-import com.example.booking_hotel.dto.response.ExceptionResponse;
 import org.springframework.web.context.request.WebRequest;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import com.example.booking_hotel.dto.response.ExceptionResponse;
 
 @ControllerAdvice
 public class globalExceptionHandler {
@@ -52,9 +53,12 @@ public class globalExceptionHandler {
                         .build());
     }
 
-
     // Lỗi khi Validation thuộc tính
-    @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class, MissingServletRequestParameterException.class})
+    @ExceptionHandler({
+        MethodArgumentNotValidException.class,
+        ConstraintViolationException.class,
+        MissingServletRequestParameterException.class
+    })
     public ResponseEntity<ExceptionResponse> handleValidationException(Exception ex, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse();
         exceptionResponse.setTimestamp(new Date());
@@ -64,8 +68,8 @@ public class globalExceptionHandler {
         List<String> messages = new ArrayList<>();
 
         // MethodArgumentNotValidException  xử lý lỗi validate từ @Valid hoặc @Validated trong Spring khi dùng với:
-        //@RequestBody
-        //@ModelAttribute
+        // @RequestBody
+        // @ModelAttribute
         if (ex instanceof MethodArgumentNotValidException) {
             BindingResult bindingResult = ((MethodArgumentNotValidException) ex).getBindingResult();
             List<FieldError> fieldErrors = bindingResult.getFieldErrors();
@@ -93,5 +97,4 @@ public class globalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
     }
-
 }

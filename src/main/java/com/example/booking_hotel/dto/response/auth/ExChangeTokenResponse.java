@@ -2,6 +2,7 @@ package com.example.booking_hotel.dto.response.auth;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

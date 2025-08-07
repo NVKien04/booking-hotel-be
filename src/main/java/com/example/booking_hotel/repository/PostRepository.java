@@ -13,11 +13,9 @@ import org.springframework.stereotype.Repository;
 
 import com.example.booking_hotel.entity.Posts;
 
-import lombok.NonNull;
-
 @Repository
 public interface PostRepository extends JpaRepository<Posts, String> {
-    Page<Posts> findAll( Pageable pageable);
+    Page<Posts> findAll(Pageable pageable);
 
     @Query(
             """
@@ -32,14 +30,13 @@ public interface PostRepository extends JpaRepository<Posts, String> {
 		OR EXISTS (
 			SELECT 1 FROM p.amenities a WHERE a.id IN (:amenitiesList)
 		))
-			
-  AND NOT EXISTS (
-      SELECT 1 FROM PostsAvailability d
-      WHERE d.post = p
-      AND d.date BETWEEN :startDate AND :endDate
-  )
-	""")
 
+AND NOT EXISTS (
+	SELECT 1 FROM PostsAvailability d
+	WHERE d.post = p
+	AND d.date BETWEEN :startDate AND :endDate
+)
+	""")
     Page<Posts> filterRoom(
             @Param("city") String city,
             @Param("guests") String guests,
@@ -51,4 +48,3 @@ public interface PostRepository extends JpaRepository<Posts, String> {
             @Param("roomType") String roomType,
             Pageable pageable);
 }
-
