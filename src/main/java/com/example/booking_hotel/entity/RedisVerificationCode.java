@@ -1,17 +1,19 @@
 package com.example.booking_hotel.entity;
 
-import com.example.booking_hotel.enums.VerificationType;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
 
-import java.time.LocalDateTime;
+import com.example.booking_hotel.enums.VerificationType;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
@@ -27,6 +29,7 @@ public class RedisVerificationCode {
 
     @Column(nullable = false)
     String email;
+
     @Column(nullable = false)
     String verificationCode;
 

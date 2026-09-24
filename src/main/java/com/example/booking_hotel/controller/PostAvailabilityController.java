@@ -5,13 +5,14 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.booking_hotel.dto.request.booking.BookingCreateRequest;
+import com.example.booking_hotel.dto.request.BookingCreateRequest;
 import com.example.booking_hotel.dto.response.ApiResponse;
-import com.example.booking_hotel.dto.response.booking.BookingResponse;
+import com.example.booking_hotel.dto.response.BookingResponse;
 import com.example.booking_hotel.service.BookingService;
 import com.example.booking_hotel.service.PostAvailabilityService;
 
@@ -35,18 +36,15 @@ public class PostAvailabilityController {
     }
 
     @PostMapping("/book-room")
-    public ApiResponse<BookingResponse> bookRoom(@Valid @RequestBody BookingCreateRequest req) {
+    public ResponseEntity<ApiResponse<BookingResponse>> bookRoom(@Valid @RequestBody BookingCreateRequest req) {
         var rs = bookingService.createBooking(req);
         notifyLockedDatesChanged(req.getPostID());
-        return rs;
+        return ResponseEntity.ok(rs);
     }
 
     @GetMapping("/locked-date/{postId}")
-    public ApiResponse<List<LocalDate>> getLockedDates(@Valid @PathVariable String postId) {
-        return ApiResponse.<List<LocalDate>>builder()
-                .message("Success")
-                .data(postAvailabilityService.getLockDateList(postId))
-                .build();
+    public ResponseEntity<ApiResponse<List<LocalDate>>> getLockedDates(@Valid @PathVariable String postId) {
+        return ResponseEntity.ok(ApiResponse.success(postAvailabilityService.getLockDateList(postId)));
     }
 
     @MessageMapping("/request-locked-date")

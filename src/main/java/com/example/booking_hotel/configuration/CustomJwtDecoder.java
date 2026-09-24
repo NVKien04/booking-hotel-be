@@ -13,7 +13,7 @@ import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Component;
 
-import com.example.booking_hotel.dto.request.auth.IntrospectRequest;
+import com.example.booking_hotel.dto.request.IntrospectRequest;
 import com.example.booking_hotel.service.AuthService;
 import com.nimbusds.jose.JOSEException;
 

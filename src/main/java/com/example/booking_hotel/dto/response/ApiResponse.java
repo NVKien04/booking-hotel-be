@@ -19,10 +19,53 @@ public class ApiResponse<T> {
     Date timestamp;
 
     @Builder.Default
-    int code = 1000;
+    int code = 200;
 
     String message;
     T data;
     Pagination pagination;
-    Payment payment;
+
+    public static <T> ApiResponse<T> success(T data) {
+        return ApiResponse.<T>builder()
+                .timestamp(new Date())
+                .code(1000)
+                .message("Success")
+                .data(data)
+                .build();
+    }
+
+    public static <T> ApiResponse<T> success(String message) {
+        return ApiResponse.<T>builder()
+                .timestamp(new Date())
+                .code(1000)
+                .message(message)
+                .build();
+    }
+
+    public static <T> ApiResponse<T> success(String message, T data) {
+        return ApiResponse.<T>builder()
+                .timestamp(new Date())
+                .code(1000)
+                .message(message)
+                .data(data)
+                .build();
+    }
+
+    public static <T> ApiResponse<T> success(String message, T data, Pagination pagination) {
+        return ApiResponse.<T>builder()
+                .timestamp(new Date())
+                .code(1000)
+                .message(message)
+                .data(data)
+                .pagination(pagination)
+                .build();
+    }
+
+    public static <T> ApiResponse<T> error(int code, String message) {
+        return ApiResponse.<T>builder()
+                .timestamp(new Date())
+                .code(code)
+                .message(message)
+                .build();
+    }
 }

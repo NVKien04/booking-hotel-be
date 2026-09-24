@@ -1,8 +1,7 @@
 package com.example.booking_hotel.service.Impl;
 
-import com.example.booking_hotel.configuration.SecurityUtil;
-import com.example.booking_hotel.dto.response.ApiResponse;
-import com.example.booking_hotel.dto.response.Pagination;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -10,8 +9,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.booking_hotel.dto.response.user.AvatarResponse;
-import com.example.booking_hotel.dto.response.user.UserResponse;
+import com.example.booking_hotel.configuration.SecurityUtil;
+import com.example.booking_hotel.dto.response.ApiResponse;
+import com.example.booking_hotel.dto.response.Pagination;
+import com.example.booking_hotel.dto.response.AvatarResponse;
+import com.example.booking_hotel.dto.response.UserResponse;
 import com.example.booking_hotel.entity.User;
 import com.example.booking_hotel.exception.AppException;
 import com.example.booking_hotel.exception.ErrorCode;
@@ -23,10 +25,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

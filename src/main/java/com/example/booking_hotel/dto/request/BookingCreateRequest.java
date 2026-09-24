@@ -1,0 +1,30 @@
+package com.example.booking_hotel.dto.request;
+
+import java.time.LocalDate;
+
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class BookingCreateRequest {
+    LocalDate checkIn;
+    LocalDate checkOut;
+
+    @Min(value = 0, message = "guest phải lớn hơn 0")
+    @NotNull(message = "guest không được null")
+    int guest;
+
+    @NotBlank(message = "postID không được để trống")
+    String postID;
+}

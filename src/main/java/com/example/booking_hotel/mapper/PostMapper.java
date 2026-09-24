@@ -3,10 +3,10 @@ package com.example.booking_hotel.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import com.example.booking_hotel.dto.request.post.PostCreateRequest;
-import com.example.booking_hotel.dto.response.post.PostCardItemResponse;
-import com.example.booking_hotel.dto.response.post.PostDetailResponse;
-import com.example.booking_hotel.dto.response.post.PostResponse;
+import com.example.booking_hotel.dto.request.PostCreateRequest;
+import com.example.booking_hotel.dto.response.PostCardItemResponse;
+import com.example.booking_hotel.dto.response.PostDetailResponse;
+import com.example.booking_hotel.dto.response.PostResponse;
 import com.example.booking_hotel.entity.Posts;
 
 @Mapper(

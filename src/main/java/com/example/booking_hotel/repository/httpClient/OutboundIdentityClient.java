@@ -4,8 +4,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import com.example.booking_hotel.dto.request.auth.ExChangeTokenRequest;
-import com.example.booking_hotel.dto.response.auth.ExChangeTokenResponse;
+import com.example.booking_hotel.dto.request.ExChangeTokenRequest;
+import com.example.booking_hotel.dto.response.ExChangeTokenResponse;
 
 import feign.QueryMap;
 

@@ -8,34 +8,33 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.UUID;
 
-import com.example.booking_hotel.dto.request.auth.*;
-import com.example.booking_hotel.dto.response.ApiResponse;
-import com.example.booking_hotel.dto.response.TokenResponse;
-import com.example.booking_hotel.entity.RedisRevokedToken;
-import com.example.booking_hotel.entity.RefreshToken;
-import com.example.booking_hotel.enums.TokenType;
-import com.example.booking_hotel.repository.RefreshTokenRepository;
-import com.example.booking_hotel.repository.RevokedTokenCodeRepository;
-import com.example.booking_hotel.service.EmailService;
-import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.booking_hotel.configuration.SecurityUtil;
-import com.example.booking_hotel.dto.response.auth.AuthResponse;
-import com.example.booking_hotel.dto.response.auth.IntrospectResponse;
+import com.example.booking_hotel.dto.request.*;
+import com.example.booking_hotel.dto.response.ApiResponse;
+import com.example.booking_hotel.dto.response.AuthResponse;
+import com.example.booking_hotel.dto.response.IntrospectResponse;
+import com.example.booking_hotel.entity.RedisRevokedToken;
+import com.example.booking_hotel.entity.RefreshToken;
 import com.example.booking_hotel.entity.User;
 import com.example.booking_hotel.enums.AccountStatus;
 import com.example.booking_hotel.enums.Role;
+import com.example.booking_hotel.enums.TokenType;
 import com.example.booking_hotel.exception.AppException;
 import com.example.booking_hotel.exception.ErrorCode;
 import com.example.booking_hotel.mapper.UserMapper;
+import com.example.booking_hotel.repository.RefreshTokenRepository;
+import com.example.booking_hotel.repository.RevokedTokenCodeRepository;
 import com.example.booking_hotel.repository.UserRepository;
 import com.example.booking_hotel.repository.httpClient.OutboundIdentityClient;
 import com.example.booking_hotel.repository.httpClient.OutboundUserClient;
 import com.example.booking_hotel.service.AuthService;
+import com.example.booking_hotel.service.EmailService;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -47,7 +46,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -58,22 +56,20 @@ public class AuthServiceImpl implements AuthService {
     RevokedTokenCodeRepository revokedTokenCodeRepository;
     RefreshTokenRepository refreshTokenRepository;
 
-
     @NonFinal
     @Value("${jwt.refreshKey}")
     private String REFRESH_KEY;
 
     @NonFinal
-    @Value("${jwt.refresh-token.expiry-in-days}")//20
+    @Value("${jwt.refresh-token.expiry-in-days}") // 20
     private long refreshTokenExpiration;
-
 
     @NonFinal
     @Value("${jwt.resetKey}")
     private String RESET_KEY;
 
     @NonFinal
-    @Value("${jwt.reset.expiry-in-minutes}")//15
+    @Value("${jwt.reset.expiry-in-minutes}") // 15
     private long resetTokenExpiration;
 
     @NonFinal
@@ -81,7 +77,7 @@ public class AuthServiceImpl implements AuthService {
     private String SIGNER_KEY;
 
     @NonFinal
-    @Value("${jwt.access-token.expiry-in-minutes}")//15
+    @Value("${jwt.access-token.expiry-in-minutes}") // 15
     private long accessTokenExpiration;
 
     @NonFinal
@@ -116,7 +112,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Transactional
     @Override
-    public TokenResponse registerRenter(RegisterRequest registerRequest) {
+    public AuthResponse registerRenter(RegisterRequest registerRequest) {
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
@@ -127,11 +123,11 @@ public class AuthServiceImpl implements AuthService {
         user.setStatus(AccountStatus.UNVERIFIED);
         var rs = userRepository.save(user);
         emailService.senEmailUserWithRegister(user);
-        return generateTokenAndSave(rs);// vd hàm này thực hiện thành công
+        return generateTokenAndSave(rs); // vd hàm này thực hiện thành công
     }
 
     @Transactional
-    public TokenResponse authenticated(LoginRequest loginRequest) {
+    public AuthResponse authenticated(LoginRequest loginRequest) {
         User user = userRepository
                 .findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -140,7 +136,7 @@ public class AuthServiceImpl implements AuthService {
         if (!authenticate) {
             throw new AppException(ErrorCode.BAD_CREDENTIALS);
         }
-        return  generateTokenAndSave(user);
+        return generateTokenAndSave(user);
     }
 
     @Transactional
@@ -150,31 +146,41 @@ public class AuthServiceImpl implements AuthService {
 
         boolean invalidated = true;
 
-
-            try {
-                verifyToken(token, TokenType.ACCESS_TOKEN);    } catch (JOSEException | AppException | ParseException e) {
+        try {
+            verifyToken(token, TokenType.ACCESS_TOKEN);
+        } catch (JOSEException | AppException | ParseException e) {
             invalidated = false;
         }
 
         return IntrospectResponse.builder().valid(invalidated).build();
     }
 
-
-
-    private  String getKey (TokenType tokenType){
-        switch (tokenType){
-            case ACCESS_TOKEN -> {return SIGNER_KEY;}
-            case REFRESH_TOKEN -> {return REFRESH_KEY;}
-            case RESET_PASSWORD_TOKEN -> {return RESET_KEY;}
+    private String getKey(TokenType tokenType) {
+        switch (tokenType) {
+            case ACCESS_TOKEN -> {
+                return SIGNER_KEY;
+            }
+            case REFRESH_TOKEN -> {
+                return REFRESH_KEY;
+            }
+            case RESET_PASSWORD_TOKEN -> {
+                return RESET_KEY;
+            }
             default -> throw new AppException(ErrorCode.BAD_CREDENTIALS);
         }
     }
 
     private long getDurationByToken(TokenType type) {
         switch (type) {
-            case ACCESS_TOKEN -> {return Duration.ofMinutes(accessTokenExpiration).getSeconds();}
-            case REFRESH_TOKEN -> {return Duration.ofDays(refreshTokenExpiration).getSeconds();}
-            case RESET_PASSWORD_TOKEN -> {return Duration.ofMinutes(resetTokenExpiration).getSeconds();}
+            case ACCESS_TOKEN -> {
+                return Duration.ofMinutes(accessTokenExpiration).getSeconds();
+            }
+            case REFRESH_TOKEN -> {
+                return Duration.ofDays(refreshTokenExpiration).getSeconds();
+            }
+            case RESET_PASSWORD_TOKEN -> {
+                return Duration.ofMinutes(resetTokenExpiration).getSeconds();
+            }
             default -> throw new AppException(ErrorCode.BAD_CREDENTIALS);
         }
     }
@@ -188,8 +194,9 @@ public class AuthServiceImpl implements AuthService {
                 .subject(user.getEmail())
                 .issuer("bookingClone")
                 .issueTime(new Date())
-                .expirationTime(
-                        new Date(Instant.now().plus(durationInSeconds, ChronoUnit.SECONDS).toEpochMilli()))
+                .expirationTime(new Date(Instant.now()
+                        .plus(durationInSeconds, ChronoUnit.SECONDS)
+                        .toEpochMilli()))
                 .claim("id", user.getId())
                 .claim("email", user.getEmail())
                 .claim("role", user.getRole().getDisplayName())
@@ -229,26 +236,25 @@ public class AuthServiceImpl implements AuthService {
         JWSVerifier jwsVerifier = new MACVerifier(getKey(tokenType));
         SignedJWT signedJWT = SignedJWT.parse(token);
 
-        Date expiryTime =  signedJWT.getJWTClaimsSet().getExpirationTime();
+        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
         var verified = signedJWT.verify(jwsVerifier);
 
         if (!verified || expiryTime.before(new Date())) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
-        if(tokenType.equals(TokenType.ACCESS_TOKEN) &&  revokedTokenCodeRepository.existsById(token)){
+        if (tokenType.equals(TokenType.ACCESS_TOKEN) && revokedTokenCodeRepository.existsById(token)) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
-        if(tokenType.equals(TokenType.REFRESH_TOKEN) &&  !refreshTokenRepository.existsByRefreshToken(token)){
+        if (tokenType.equals(TokenType.REFRESH_TOKEN) && !refreshTokenRepository.existsByRefreshToken(token)) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
-
         }
         return SignedJWT.parse(token);
     }
 
     @Override
-    public TokenResponse refreshToken(String refreshToken) throws JOSEException, ParseException {
+    public AuthResponse refreshToken(String refreshToken) throws JOSEException, ParseException {
 
         var signJWT = verifyToken(refreshToken, TokenType.REFRESH_TOKEN);
         var jit = signJWT.getJWTClaimsSet().getJWTID();
@@ -256,17 +262,19 @@ public class AuthServiceImpl implements AuthService {
         var userEmail = signJWT.getJWTClaimsSet().getSubject();
         User user =
                 userRepository.findByEmail(userEmail).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        var token = generateToken(user,TokenType.ACCESS_TOKEN);
+        var token = generateToken(user, TokenType.ACCESS_TOKEN);
 
-        return TokenResponse.builder().
-                 accessToken(token)
+        return AuthResponse.builder()
+                .accessToken(token)
                 .refreshToken(refreshToken)
-                .email(user.getEmail())
+                .tokenType("Bearer")
+                .expiresIn(Duration.ofMinutes(accessTokenExpiration).getSeconds())
+                .authenticated(true)
                 .build();
     }
 
     @Override
-    public TokenResponse outboundAuthenticate(String code) {
+    public AuthResponse outboundAuthenticate(String code) {
         try {
             var response = outboundIdentityClient.exchangeToken(ExChangeTokenRequest.builder()
                     .code(code)
@@ -316,7 +324,7 @@ public class AuthServiceImpl implements AuthService {
         if (!authenticate) {
             throw new AppException(ErrorCode.INVALID_OLD_PASSWORD);
         }
-        if(!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmPassword())) {
+        if (!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmPassword())) {
             throw new AppException(ErrorCode.PASSWORD_MISMATCH);
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -324,14 +332,16 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public TokenResponse generateTokenAndSave(User user) {
+    public AuthResponse generateTokenAndSave(User user) {
         String accessToken = generateToken(user, TokenType.ACCESS_TOKEN);
-        String refreshToken = generateToken(user, TokenType.REFRESH_TOKEN);//hàm này có lỗi thì có rollback không
+        String refreshToken = generateToken(user, TokenType.REFRESH_TOKEN); // hàm này có lỗi thì có rollback không
         saveRefreshToken(refreshToken);
-        return TokenResponse.builder()
+        return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .email(user.getEmail())
+                .tokenType("Bearer")
+                .expiresIn(Duration.ofMinutes(accessTokenExpiration).getSeconds())
+                .authenticated(true)
                 .build();
     }
 
@@ -344,6 +354,4 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         refreshTokenRepository.save(refreshToken);
     }
-
-
 }

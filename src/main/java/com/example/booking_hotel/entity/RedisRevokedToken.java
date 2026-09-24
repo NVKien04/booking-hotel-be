@@ -1,12 +1,13 @@
 package com.example.booking_hotel.entity;
 
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import java.util.Date;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
 
-import java.util.Date;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
@@ -18,6 +19,7 @@ import java.util.Date;
 public class RedisRevokedToken {
     @Id
     String accessToken;
+
     String email;
     Date expiryTime;
 

@@ -2,6 +2,7 @@ package com.example.booking_hotel.controller;
 
 import jakarta.validation.Valid;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.booking_hotel.dto.request.ReviewRequest;
 import com.example.booking_hotel.dto.response.ApiResponse;
-import com.example.booking_hotel.dto.response.reviews.ReviewsResponse;
+import com.example.booking_hotel.dto.response.ReviewsResponse;
 import com.example.booking_hotel.service.ReviewService;
 
 import lombok.AccessLevel;
@@ -24,11 +25,8 @@ public class ReviewController {
     ReviewService reviewService;
 
     @PostMapping("/create")
-    public ApiResponse<ReviewsResponse> createReview(@Valid @RequestBody ReviewRequest reviewRequest) {
-
-        return ApiResponse.<ReviewsResponse>builder()
-                .message("success")
-                .data(reviewService.createReviews(reviewRequest))
-                .build();
+    public ResponseEntity<ApiResponse<ReviewsResponse>> createReview(@Valid @RequestBody ReviewRequest reviewRequest) {
+        var response = reviewService.createReviews(reviewRequest);
+        return ResponseEntity.ok(ApiResponse.success("success", response));
     }
 }

@@ -4,17 +4,18 @@ import java.util.List;
 import java.util.Set;
 
 import jakarta.validation.Valid;
-
 import jakarta.validation.constraints.NotEmpty;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.booking_hotel.dto.request.post.PostCreateRequest;
-import com.example.booking_hotel.dto.request.post.PostSearchRequest;
+import com.example.booking_hotel.dto.request.PostCreateRequest;
+import com.example.booking_hotel.dto.request.PostSearchRequest;
 import com.example.booking_hotel.dto.response.ApiResponse;
-import com.example.booking_hotel.dto.response.post.PostCardItemResponse;
-import com.example.booking_hotel.dto.response.post.PostDetailResponse;
-import com.example.booking_hotel.dto.response.post.PostResponse;
+import com.example.booking_hotel.dto.response.PostCardItemResponse;
+import com.example.booking_hotel.dto.response.PostDetailResponse;
+import com.example.booking_hotel.dto.response.PostResponse;
 import com.example.booking_hotel.service.PostService;
 
 import lombok.AccessLevel;
@@ -32,50 +33,45 @@ public class PostController {
 
     @PreAuthorize("hasRole('RENTER')")
     @PostMapping("/create")
-    public ApiResponse<PostResponse> createPost(@Valid @ModelAttribute PostCreateRequest postCreateRequest) {
+    public ResponseEntity<ApiResponse<PostResponse>> createPost(
+            @Valid @ModelAttribute PostCreateRequest postCreateRequest) {
         PostResponse postResponse = postService.create(postCreateRequest);
-        return ApiResponse.<PostResponse>builder()
-                .data(postResponse)
-                .message("Success")
-                .build();
+        return ResponseEntity.ok(ApiResponse.success(postResponse));
     }
 
     @GetMapping("/fetchPost")
-    public ApiResponse<List<PostCardItemResponse>> getPost(
+    public ResponseEntity<ApiResponse<List<PostCardItemResponse>>> getPost(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int size,
             @ModelAttribute PostSearchRequest postSearchRequest,
             @RequestParam(defaultValue = "rating,asc") String sort) {
-        return postService.search(page, size, sort, postSearchRequest);
+        var response = postService.search(page, size, sort, postSearchRequest);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/home")
-    public ApiResponse<List<PostCardItemResponse>> getHome(
+    public ResponseEntity<ApiResponse<List<PostCardItemResponse>>> getHome(
             @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "6") int size) {
-        return postService.getPostCardItems(page, size);
+        var response = postService.getPostCardItems(page, size);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<PostDetailResponse> getPostDetail(@PathVariable String id) {
-        return postService.getPostDetail(id);
+    public ResponseEntity<ApiResponse<PostDetailResponse>> getPostDetail(@PathVariable String id) {
+        var response = postService.getPostDetail(id);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/delete/{id}")
-    public ApiResponse<Void> deletePost(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<Void>> deletePost(@PathVariable String id) {
         postService.deletePost(id);
-        return ApiResponse.<Void>builder()
-                .message("delete Success")
-                .build();
+        return ResponseEntity.ok(ApiResponse.success("delete Success"));
     }
 
     @DeleteMapping("/delete")
-    public ApiResponse<Void> deleteMultiplePost(@RequestBody @NotEmpty(message = "Không được để null!")
-                                                    Set<String> ids) {
+    public ResponseEntity<ApiResponse<Void>> deleteMultiplePost(
+            @RequestBody @NotEmpty(message = "Không được để null!") Set<String> ids) {
         postService.deleteMultiplePosts(ids);
-        return ApiResponse.<Void>builder()
-                .message("delete multiple Success")
-                .build();
+        return ResponseEntity.ok(ApiResponse.success("delete multiple Success"));
     }
-
-
 }

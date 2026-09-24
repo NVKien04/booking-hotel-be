@@ -1,7 +1,7 @@
 package com.example.booking_hotel.service;
 
 import com.example.booking_hotel.dto.request.ReviewRequest;
-import com.example.booking_hotel.dto.response.reviews.ReviewsResponse;
+import com.example.booking_hotel.dto.response.ReviewsResponse;
 
 public interface ReviewService {
 

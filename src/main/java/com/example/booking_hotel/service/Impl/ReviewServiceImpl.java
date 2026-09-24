@@ -5,7 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.booking_hotel.configuration.SecurityUtil;
 import com.example.booking_hotel.dto.request.ReviewRequest;
-import com.example.booking_hotel.dto.response.reviews.ReviewsResponse;
+import com.example.booking_hotel.dto.response.ReviewsResponse;
 import com.example.booking_hotel.entity.Bookings;
 import com.example.booking_hotel.entity.Posts;
 import com.example.booking_hotel.entity.Reviews;

@@ -1,9 +1,9 @@
 package com.example.booking_hotel.dto.response;
 
+import java.time.LocalDateTime;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDateTime;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class VerificationCodeResponse {
 
-    String email;;
+    String email;
+    ;
     String verificationCode;
     LocalDateTime expirationTime;
 }

@@ -1,8 +1,3 @@
 package com.example.booking_hotel.configuration;
 
-public class OpenAPIConfig {
-
-
-
-
-}
+public class OpenAPIConfig {}

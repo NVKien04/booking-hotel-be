@@ -2,11 +2,12 @@ package com.example.booking_hotel.controller;
 
 import jakarta.validation.Valid;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.booking_hotel.dto.request.booking.BookingCreateRequest;
+import com.example.booking_hotel.dto.request.BookingCreateRequest;
 import com.example.booking_hotel.dto.response.ApiResponse;
-import com.example.booking_hotel.dto.response.booking.BookingResponse;
+import com.example.booking_hotel.dto.response.BookingResponse;
 import com.example.booking_hotel.service.BookingService;
 
 import lombok.AccessLevel;
@@ -24,7 +25,9 @@ public class BookingController {
     BookingService bookingService;
 
     @PostMapping("/room")
-    public ApiResponse<BookingResponse> create(@Valid @RequestBody BookingCreateRequest bookingCreateRequest) {
-        return bookingService.createBooking(bookingCreateRequest);
+    public ResponseEntity<ApiResponse<BookingResponse>> create(
+            @Valid @RequestBody BookingCreateRequest bookingCreateRequest) {
+        var response = bookingService.createBooking(bookingCreateRequest);
+        return ResponseEntity.ok(response);
     }
 }

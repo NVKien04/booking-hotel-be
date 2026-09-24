@@ -25,6 +25,7 @@ public class SecurityConfig {
         "/auth/register",
         "/auth/login",
         "/auth/logout",
+        "/auth/refresh",
         "/auth/testEmail",
         "/auth/outbound/authentication",
         "/post/home",

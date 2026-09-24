@@ -1,6 +1,7 @@
 package com.example.booking_hotel.controller;
 
 import java.util.Collections;
+import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.booking_hotel.dto.response.ApiResponse;
 import com.example.booking_hotel.service.Impl.VnPayService;
 
 import lombok.AccessLevel;
@@ -28,12 +30,15 @@ public class PaymentController {
     VnPayService vnPayService;
 
     @GetMapping("/create")
-    public ResponseEntity<?> createPayment(HttpServletRequest request, @RequestParam("amount") Long amount) {
+    public ResponseEntity<ApiResponse<Map<String, String>>> createPayment(
+            HttpServletRequest request, @RequestParam("amount") Long amount) {
         try {
             String paymentUrl = vnPayService.createPaymentUrl(request, amount);
-            return ResponseEntity.ok(Collections.singletonMap("url", paymentUrl));
+            return ResponseEntity.ok(
+                    ApiResponse.success("Tạo URL thanh toán thành công", Collections.singletonMap("url", paymentUrl)));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi tạo URL thanh toán");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Lỗi tạo URL thanh toán"));
         }
     }
 }

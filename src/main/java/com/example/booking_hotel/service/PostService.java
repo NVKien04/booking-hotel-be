@@ -1,15 +1,14 @@
 package com.example.booking_hotel.service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
-import com.example.booking_hotel.dto.request.post.PostCreateRequest;
-import com.example.booking_hotel.dto.request.post.PostSearchRequest;
+import com.example.booking_hotel.dto.request.PostCreateRequest;
+import com.example.booking_hotel.dto.request.PostSearchRequest;
 import com.example.booking_hotel.dto.response.ApiResponse;
-import com.example.booking_hotel.dto.response.post.PostCardItemResponse;
-import com.example.booking_hotel.dto.response.post.PostDetailResponse;
-import com.example.booking_hotel.dto.response.post.PostResponse;
+import com.example.booking_hotel.dto.response.PostCardItemResponse;
+import com.example.booking_hotel.dto.response.PostDetailResponse;
+import com.example.booking_hotel.dto.response.PostResponse;
 
 public interface PostService {
 

@@ -17,6 +17,7 @@ import lombok.experimental.FieldDefaults;
 public class ExceptionResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     Date timestamp;
+
     int code;
     String message;
     String path;

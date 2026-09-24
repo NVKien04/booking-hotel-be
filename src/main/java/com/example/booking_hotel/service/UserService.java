@@ -1,12 +1,12 @@
 package com.example.booking_hotel.service;
 
-import com.example.booking_hotel.dto.response.ApiResponse;
+import java.util.List;
+
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.booking_hotel.dto.response.user.AvatarResponse;
-import com.example.booking_hotel.dto.response.user.UserResponse;
-
-import java.util.List;
+import com.example.booking_hotel.dto.response.ApiResponse;
+import com.example.booking_hotel.dto.response.AvatarResponse;
+import com.example.booking_hotel.dto.response.UserResponse;
 
 public interface UserService {
 

@@ -1,6 +1,5 @@
 package com.example.booking_hotel.service.Impl;
 
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -14,13 +13,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.booking_hotel.configuration.SecurityUtil;
-import com.example.booking_hotel.dto.request.post.PostCreateRequest;
-import com.example.booking_hotel.dto.request.post.PostSearchRequest;
+import com.example.booking_hotel.dto.request.PostCreateRequest;
+import com.example.booking_hotel.dto.request.PostSearchRequest;
 import com.example.booking_hotel.dto.response.ApiResponse;
 import com.example.booking_hotel.dto.response.Pagination;
-import com.example.booking_hotel.dto.response.post.PostCardItemResponse;
-import com.example.booking_hotel.dto.response.post.PostDetailResponse;
-import com.example.booking_hotel.dto.response.post.PostResponse;
+import com.example.booking_hotel.dto.response.PostCardItemResponse;
+import com.example.booking_hotel.dto.response.PostDetailResponse;
+import com.example.booking_hotel.dto.response.PostResponse;
 import com.example.booking_hotel.entity.*;
 import com.example.booking_hotel.exception.AppException;
 import com.example.booking_hotel.exception.ErrorCode;
@@ -160,19 +159,16 @@ public class PostServiceImpl implements PostService {
     public void deletePost(String id) {
         Posts post = postRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
         postRepository.delete(post);
-
     }
 
     @Override
     public void deleteMultiplePosts(Set<String> ids) {
-            Set<Posts> posts = new HashSet<>(postRepository.findAllById(ids));
-            if(posts.isEmpty()) {
-                throw new AppException(ErrorCode.POST_NOT_EXISTED);
-
-            }
+        Set<Posts> posts = new HashSet<>(postRepository.findAllById(ids));
+        if (posts.isEmpty()) {
+            throw new AppException(ErrorCode.POST_NOT_EXISTED);
+        }
         postRepository.deleteAll(posts);
     }
-
 
     @Override
     public ApiResponse<List<PostCardItemResponse>> getPostCardItems(int page, int size) {
