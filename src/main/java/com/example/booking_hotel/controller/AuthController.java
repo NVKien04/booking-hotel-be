@@ -19,6 +19,7 @@ import com.example.booking_hotel.exception.AppException;
 import com.example.booking_hotel.exception.ErrorCode;
 import com.example.booking_hotel.service.AuthService;
 import com.example.booking_hotel.service.EmailService;
+import com.example.booking_hotel.service.RefreshTokenService;
 import com.example.booking_hotel.service.UserService;
 import com.example.booking_hotel.utils.CookieHelper;
 import com.nimbusds.jose.JOSEException;
@@ -33,6 +34,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthController {
     AuthService authService;
+    RefreshTokenService refreshTokenService;
     EmailService emailService;
     UserService userService;
     CookieHelper cookieHelper;
@@ -91,7 +93,7 @@ public class AuthController {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
-        var auth = authService.refreshToken(token);
+        var auth = refreshTokenService.refreshToken(token);
         cookieHelper.setAuthCookies(response, auth.getRefreshToken());
         return ResponseEntity.ok(ApiResponse.success("Refresh token thành công", sanitizeResponse(auth)));
     }

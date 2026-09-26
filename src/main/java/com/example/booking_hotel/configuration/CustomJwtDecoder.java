@@ -14,7 +14,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Component;
 
 import com.example.booking_hotel.dto.request.IntrospectRequest;
-import com.example.booking_hotel.service.AuthService;
+import com.example.booking_hotel.service.JwtService;
 import com.nimbusds.jose.JOSEException;
 
 @Component
@@ -23,17 +23,17 @@ public class CustomJwtDecoder implements JwtDecoder {
     private String signerKey;
 
     @Autowired
-    private AuthService authService;
+    private JwtService jwtService;
 
     private NimbusJwtDecoder nimbusJwtDecoder = null;
 
     @Override
     public Jwt decode(String token) throws JwtException {
         try {
-            var response = authService.introspectResponse(
+            var response = jwtService.introspectResponse(
                     IntrospectRequest.builder().token(token).build());
             if (!response.isValid()) throw new JwtException("Token invalid");
-        } catch (JOSEException | ParseException e) {
+        } catch (Exception e) {
             throw new JwtException(e.getMessage());
         }
         if (Objects.isNull(nimbusJwtDecoder)) {

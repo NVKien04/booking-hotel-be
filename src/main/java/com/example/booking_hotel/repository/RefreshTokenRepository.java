@@ -9,4 +9,6 @@ import com.example.booking_hotel.entity.RefreshToken;
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, String> {
 
     boolean existsByRefreshToken(String token);
+
+    void deleteByRefreshToken(String token);
 }
