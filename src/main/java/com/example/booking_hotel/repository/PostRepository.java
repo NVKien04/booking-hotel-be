@@ -15,36 +15,37 @@ import com.example.booking_hotel.entity.Posts;
 
 @Repository
 public interface PostRepository extends JpaRepository<Posts, String> {
-    Page<Posts> findAll(Pageable pageable);
+	Page<Posts> findAll(Pageable pageable);
 
-    @Query(
-            """
-	SELECT p FROM Posts p
-	WHERE (:city IS NULL OR p.city.slug = :city)
-	and (:guests IS NULL OR p.capacity >= :guests)
-	AND (:roomType IS NULL OR p.placeType.id = :roomType)
-	AND (:minPrice IS NULL OR p.nightPrice >= :minPrice)
-	AND (:maxPrice IS NULL OR p.nightPrice <= :maxPrice)
-	AND (:maxPrice IS NULL OR p.nightPrice <= :maxPrice)
-	AND (:amenitiesList IS NULL
-		OR EXISTS (
-			SELECT 1 FROM p.amenities a WHERE a.id IN (:amenitiesList)
-		))
+	Page<Posts> findByOwnerId(String ownerId, Pageable pageable);
 
-AND NOT EXISTS (
-	SELECT 1 FROM PostsAvailability d
-	WHERE d.post = p
-	AND d.date BETWEEN :startDate AND :endDate
-)
-	""")
-    Page<Posts> filterRoom(
-            @Param("city") String city,
-            @Param("guests") String guests,
-            @Param("maxPrice") BigDecimal maxPrice,
-            @Param("minPrice") BigDecimal minPrice,
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate,
-            @Param("amenitiesList") List<String> amenitiesList,
-            @Param("roomType") String roomType,
-            Pageable pageable);
+	@Query("""
+				SELECT p FROM Posts p
+				WHERE (:city IS NULL OR p.city.slug = :city)
+				and (:guests IS NULL OR p.capacity >= :guests)
+				AND (:roomType IS NULL OR p.placeType.id = :roomType)
+				AND (:minPrice IS NULL OR p.nightPrice >= :minPrice)
+				AND (:maxPrice IS NULL OR p.nightPrice <= :maxPrice)
+				AND (:maxPrice IS NULL OR p.nightPrice <= :maxPrice)
+				AND (:amenitiesList IS NULL
+					OR EXISTS (
+						SELECT 1 FROM p.amenities a WHERE a.id IN (:amenitiesList)
+					))
+
+			AND NOT EXISTS (
+				SELECT 1 FROM PostsAvailability d
+				WHERE d.post = p
+				AND d.date BETWEEN :startDate AND :endDate
+			)
+				""")
+	Page<Posts> filterRoom(
+			@Param("city") String city,
+			@Param("guests") String guests,
+			@Param("maxPrice") BigDecimal maxPrice,
+			@Param("minPrice") BigDecimal minPrice,
+			@Param("startDate") LocalDate startDate,
+			@Param("endDate") LocalDate endDate,
+			@Param("amenitiesList") List<String> amenitiesList,
+			@Param("roomType") String roomType,
+			Pageable pageable);
 }

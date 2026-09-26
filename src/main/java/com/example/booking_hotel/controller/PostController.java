@@ -39,6 +39,25 @@ public class PostController {
         return ResponseEntity.ok(ApiResponse.success(postResponse));
     }
 
+    @PreAuthorize("hasAnyRole('RENTER', 'HOST')")
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<PostResponse>> updatePost(
+            @PathVariable String id,
+            @ModelAttribute com.example.booking_hotel.dto.request.PostUpdateRequest postUpdateRequest) {
+        PostResponse postResponse = postService.update(id, postUpdateRequest);
+        return ResponseEntity.ok(ApiResponse.success(postResponse));
+    }
+
+    @PreAuthorize("hasAnyRole('RENTER', 'HOST')")
+    @GetMapping("/my-posts")
+    public ResponseEntity<ApiResponse<List<PostCardItemResponse>>> getMyPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        var response = postService.getMyPosts(page, size);
+        return ResponseEntity.ok(response);
+    }
+
+
     @GetMapping("/fetchPost")
     public ResponseEntity<ApiResponse<List<PostCardItemResponse>>> getPost(
             @RequestParam(defaultValue = "0") int page,

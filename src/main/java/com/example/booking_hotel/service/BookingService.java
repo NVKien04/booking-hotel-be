@@ -12,4 +12,12 @@ public interface BookingService {
     ApiResponse<BookingResponse> createBooking(BookingCreateRequest bookingCreateRequest);
 
     List<LocalDate> getAvailableDate(String postId);
+
+    ApiResponse<List<BookingResponse>> getMyBookings();
+
+    ApiResponse<BookingResponse> getBookingDetail(String id);
+
+    ApiResponse<Void> cancelBooking(String id);
+
+    ApiResponse<List<BookingResponse>> getHostBookings();
 }

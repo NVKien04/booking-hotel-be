@@ -6,10 +6,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.booking_hotel.configuration.SecurityUtil;
+import com.example.booking_hotel.dto.request.UpdateUserRequest;
 import com.example.booking_hotel.dto.response.ApiResponse;
 import com.example.booking_hotel.dto.response.Pagination;
 import com.example.booking_hotel.dto.response.AvatarResponse;
@@ -34,6 +36,7 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
     UploadService uploadService;
     UserMapper userMapper;
+    PasswordEncoder passwordEncoder;
 
     @NonFinal
     @Value("${file.upload-user}")
@@ -80,4 +83,21 @@ public class UserServiceImpl implements UserService {
         var rs = userRepository.save(user);
         return AvatarResponse.builder().url(rs.getAvatar_img()).build();
     }
+
+    @Override
+    public UserResponse updateUser(UpdateUserRequest request) {
+        String userId = securityUtil.getCurrentUserId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        if (request.getUsername() != null && !request.getUsername().isBlank()) {
+            user.setUsername(request.getUsername());
+        }
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        User updatedUser = userRepository.save(user);
+        return userMapper.mapToUserResponse(updatedUser);
+    }
 }
+

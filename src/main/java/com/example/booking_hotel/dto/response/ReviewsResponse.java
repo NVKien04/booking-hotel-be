@@ -12,7 +12,9 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ReviewsResponse {
+    String id;
     UserResponse user;
     int rating;
     String comment;
+    java.time.LocalDate createdAt;
 }

@@ -3,10 +3,7 @@ package com.example.booking_hotel.controller;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.booking_hotel.dto.request.ReviewRequest;
 import com.example.booking_hotel.dto.response.ApiResponse;
@@ -29,4 +26,18 @@ public class ReviewController {
         var response = reviewService.createReviews(reviewRequest);
         return ResponseEntity.ok(ApiResponse.success("success", response));
     }
+
+    @GetMapping("/post/{postId}")
+    public ResponseEntity<ApiResponse<java.util.List<ReviewsResponse>>> getReviewsByPost(
+            @PathVariable String postId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(reviewService.getReviewsByPostId(postId, page, size));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteReview(@PathVariable String id) {
+        return ResponseEntity.ok(reviewService.deleteReview(id));
+    }
 }
+

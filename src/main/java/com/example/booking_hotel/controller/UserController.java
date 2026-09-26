@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.booking_hotel.configuration.SecurityUtil;
+import com.example.booking_hotel.dto.request.UpdateUserRequest;
 import com.example.booking_hotel.dto.response.ApiResponse;
 import com.example.booking_hotel.dto.response.AvatarResponse;
 import com.example.booking_hotel.dto.response.UserResponse;
@@ -35,6 +36,13 @@ public class UserController {
         var user = userService.getInfoUser();
         return ResponseEntity.ok(ApiResponse.success("User Info", user));
     }
+
+    @PutMapping("/me")
+    public ResponseEntity<ApiResponse<UserResponse>> updateUser(@RequestBody UpdateUserRequest request) {
+        var user = userService.updateUser(request);
+        return ResponseEntity.ok(ApiResponse.success("Update User Success", user));
+    }
+
 
     @PostMapping("/addAvatar")
     public ResponseEntity<ApiResponse<AvatarResponse>> addAvatar(@RequestParam("file") MultipartFile file) {

@@ -23,4 +23,8 @@ public interface PostService {
     public void deleteMultiplePosts(Set<String> ids);
 
     public ApiResponse<List<PostCardItemResponse>> getPostCardItems(int page, int size);
+
+    PostResponse update(String id, com.example.booking_hotel.dto.request.PostUpdateRequest request);
+
+    ApiResponse<List<PostCardItemResponse>> getMyPosts(int page, int size);
 }

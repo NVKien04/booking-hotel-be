@@ -29,4 +29,13 @@ public interface BookingRepository extends JpaRepository<Bookings, String> {
     @Query("select b from Bookings b where b.posts.id = :postId and b.stats in :statusList")
     List<Bookings> findByPostIdAndStatusIn(
             @Param("postId") String postId, @Param("statusList") List<String> statusList);
+
+    @EntityGraph(attributePaths = {"posts", "user"})
+    List<Bookings> findByUserIdOrderByCreatedAtDesc(String userId);
+
+    @EntityGraph(attributePaths = {"posts", "user"})
+    List<Bookings> findByPostsOwnerIdOrderByCreatedAtDesc(String ownerId);
+
+    @EntityGraph(attributePaths = {"posts", "user"})
+    Optional<Bookings> findByIdAndUserId(String id, String userId);
 }

@@ -30,4 +30,30 @@ public class BookingController {
         var response = bookingService.createBooking(bookingCreateRequest);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/my-bookings")
+    public ResponseEntity<ApiResponse<java.util.List<BookingResponse>>> getMyBookings() {
+        return ResponseEntity.ok(bookingService.getMyBookings());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<BookingResponse>> getBookingDetail(@PathVariable String id) {
+        return ResponseEntity.ok(bookingService.getBookingDetail(id));
+    }
+
+    @PutMapping("/cancel/{id}")
+    public ResponseEntity<ApiResponse<Void>> cancelBooking(@PathVariable String id) {
+        return ResponseEntity.ok(bookingService.cancelBooking(id));
+    }
+
+    @GetMapping("/host-bookings")
+    public ResponseEntity<ApiResponse<java.util.List<BookingResponse>>> getHostBookings() {
+        return ResponseEntity.ok(bookingService.getHostBookings());
+    }
+
+    @GetMapping("/available-dates/{postId}")
+    public ResponseEntity<ApiResponse<java.util.List<java.time.LocalDate>>> getAvailableDates(@PathVariable String postId) {
+        return ResponseEntity.ok(ApiResponse.success(bookingService.getAvailableDate(postId)));
+    }
 }
+

@@ -15,4 +15,6 @@ public interface UserService {
     public ApiResponse<List<UserResponse>> getAllUser(int page, int size);
 
     public AvatarResponse addAvatar(String idUser, MultipartFile file);
+
+    public UserResponse updateUser(com.example.booking_hotel.dto.request.UpdateUserRequest request);
 }

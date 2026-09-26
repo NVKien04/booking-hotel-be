@@ -16,6 +16,11 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BookingResponse {
+    String id;
+    String status;
+    String postId;
+    String postTitle;
+    String postThumbnail;
     UserResponse user;
     LocalDate check_in;
     LocalDate check_out;
@@ -24,5 +29,4 @@ public class BookingResponse {
     BigDecimal totalAmount;
     int guest;
     List<ReviewsResponse> reviews;
-    String postId;
 }

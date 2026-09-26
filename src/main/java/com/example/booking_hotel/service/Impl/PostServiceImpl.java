@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.booking_hotel.configuration.SecurityUtil;
 import com.example.booking_hotel.dto.request.PostCreateRequest;
 import com.example.booking_hotel.dto.request.PostSearchRequest;
+import com.example.booking_hotel.dto.request.PostUpdateRequest;
 import com.example.booking_hotel.dto.response.ApiResponse;
 import com.example.booking_hotel.dto.response.Pagination;
 import com.example.booking_hotel.dto.response.PostCardItemResponse;
@@ -189,4 +190,108 @@ public class PostServiceImpl implements PostService {
                 .pagination(pagination)
                 .build();
     }
+
+    @Override
+    @Transactional
+    public PostResponse update(String id, PostUpdateRequest request) {
+        String userId = securityUtil.getCurrentUserId();
+        Posts post = postRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
+
+        if (!post.getOwner().getId().equals(userId)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        if (request.getTitle() != null && !request.getTitle().isBlank()) {
+            post.setTitle(request.getTitle());
+        }
+        if (request.getShort_description() != null && !request.getShort_description().isBlank()) {
+            post.setShort_description(request.getShort_description());
+        }
+        if (request.getNightPrice() != null) {
+            post.setNightPrice(request.getNightPrice());
+        }
+        if (request.getWeekendPrice() != null) {
+            post.setWeekendPrice(request.getWeekendPrice());
+        }
+        if (request.getCapacity() != null) {
+            post.setCapacity(request.getCapacity());
+        }
+        if (request.getBedrooms() != null) {
+            post.setBedrooms(request.getBedrooms());
+        }
+        if (request.getBathrooms() != null) {
+            post.setBathrooms(request.getBathrooms());
+        }
+        if (request.getBeds() != null) {
+            post.setBeds(request.getBeds());
+        }
+        if (request.getEffectivePetFriendly() != null) {
+            post.setPet_friendly(request.getEffectivePetFriendly());
+        }
+
+        if (request.getEffectiveCityId() != null && !request.getEffectiveCityId().isBlank()) {
+            cityRepository.findById(request.getEffectiveCityId()).ifPresent(post::setCity);
+        }
+        if (request.getEffectiveDistrictId() != null && !request.getEffectiveDistrictId().isBlank()) {
+            districtRepository.findById(request.getEffectiveDistrictId()).ifPresent(post::setDistrict);
+        }
+        if (request.getAddressDetail() != null && !request.getAddressDetail().isBlank()) {
+            post.setAddressDetail(request.getAddressDetail());
+        }
+
+        // Cập nhật fullAddress nếu có thay đổi về địa chỉ
+        String addrDetail = post.getAddressDetail();
+        String districtName = post.getDistrict() != null ? post.getDistrict().getName() : null;
+        String cityName = post.getCity() != null ? post.getCity().getName() : null;
+        String fullAddress = Stream.of(addrDetail, districtName, cityName)
+                .filter(Objects::nonNull)
+                .filter(s -> !s.isBlank())
+                .collect(Collectors.joining(", "));
+        post.setFullAddress(fullAddress);
+
+        if (request.getThumbnail() != null && !request.getThumbnail().isEmpty()) {
+            String thumbnailUrl = uploadService.uploadFile(request.getThumbnail(), thumbnailPath, "post");
+            post.setThumbnail(thumbnailUrl);
+        }
+
+        if (request.getPlaceType() != null && !request.getPlaceType().isBlank()) {
+            placeTypeRepository.findById(request.getPlaceType()).ifPresent(post::setPlaceType);
+        }
+
+        List<String> amenityIds = request.getEffectiveAmenityIds();
+        if (amenityIds != null && !amenityIds.isEmpty()) {
+            Set<Amenities> amenities = new HashSet<>(amenitiesRepository.findAllById(amenityIds));
+            post.setAmenities(amenities);
+        }
+
+        Posts updatedPost = postRepository.save(post);
+
+        if (request.getFiles() != null && request.getFiles().length > 0) {
+            postImgService.uploadMultipleImg_Post(request.getFiles(), updatedPost.getId());
+        }
+
+        return postMapper.toPostResponse(updatedPost);
+    }
+
+    @Override
+    public ApiResponse<List<PostCardItemResponse>> getMyPosts(int page, int size) {
+        String userId = securityUtil.getCurrentUserId();
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<Posts> pagePosts = postRepository.findByOwnerId(userId, pageable);
+        List<Posts> listPost = pagePosts.getContent();
+        var pagination = Pagination.builder()
+                .page(page)
+                .limit(size)
+                .totalPages(pagePosts.getTotalPages())
+                .totalRecords(pagePosts.getTotalElements())
+                .build();
+        List<PostCardItemResponse> listPostCardItemResponse =
+                listPost.stream().map(postMapper::toPostCardItemResponse).toList();
+        return ApiResponse.<List<PostCardItemResponse>>builder()
+                .message("Success")
+                .data(listPostCardItemResponse)
+                .pagination(pagination)
+                .build();
+    }
 }
+

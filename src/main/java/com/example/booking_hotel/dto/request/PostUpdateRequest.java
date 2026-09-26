@@ -30,14 +30,38 @@ public class PostUpdateRequest {
     BigDecimal weekendPrice;
     MultipartFile thumbnail;
     MultipartFile[] files;
-    int capacity;
+    Integer capacity;
     String addressDetail;
     String district;
+    String districtId;
     String city;
-    boolean pet_friendly;
+    String cityId;
+    Boolean pet_friendly;
+    Boolean petFriendly;
     String placeType;
     List<String> amenity_id = new ArrayList<>();
-    int bedrooms;
-    int bathrooms;
-    int beds;
+    List<String> amenityIds = new ArrayList<>();
+    Integer bedrooms;
+    Integer bathrooms;
+    Integer beds;
+
+    public String getEffectiveCityId() {
+        return cityId != null && !cityId.isBlank() ? cityId : city;
+    }
+
+    public String getEffectiveDistrictId() {
+        return districtId != null && !districtId.isBlank() ? districtId : district;
+    }
+
+    public List<String> getEffectiveAmenityIds() {
+        if (amenityIds != null && !amenityIds.isEmpty()) {
+            return amenityIds;
+        }
+        return amenity_id != null ? amenity_id : new ArrayList<>();
+    }
+
+    public Boolean getEffectivePetFriendly() {
+        if (petFriendly != null) return petFriendly;
+        return pet_friendly;
+    }
 }

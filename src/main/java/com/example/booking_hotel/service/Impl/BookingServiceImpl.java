@@ -81,9 +81,12 @@ public class BookingServiceImpl implements BookingService {
         bookings.setTotalPrice(totalPrice.getSubtotal());
         bookings.setDiscount(totalPrice.getDiscount());
         bookings.setTotalAmount(totalPrice.getTotalAmount());
+        bookings = bookingRepository.save(bookings);
+        for (var aDay : aDays) {
+            aDay.setBooking(bookings);
+        }
         postAvailabilityRepository.saveAll(aDays);
-        BookingResponse bookingResponse = bookingMapper.toBookingresponse(bookingRepository.save(bookings));
-        bookingResponse.setPostId(post.getId());
+        BookingResponse bookingResponse = bookingMapper.toBookingresponse(bookings);
         return ApiResponse.<BookingResponse>builder()
                 .message("Successfully created booking")
                 .data(bookingResponse)
@@ -104,6 +107,77 @@ public class BookingServiceImpl implements BookingService {
             }
         }
         return bookListDate;
+    }
+
+    @Override
+    public ApiResponse<List<BookingResponse>> getMyBookings() {
+        String userId = securityUtil.getCurrentUserId();
+        List<Bookings> list = bookingRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        List<BookingResponse> responses = list.stream()
+                .map(bookingMapper::toBookingresponse)
+                .toList();
+        return ApiResponse.<List<BookingResponse>>builder()
+                .message("Lấy danh sách đặt phòng thành công")
+                .data(responses)
+                .build();
+    }
+
+    @Override
+    public ApiResponse<BookingResponse> getBookingDetail(String id) {
+        String userId = securityUtil.getCurrentUserId();
+        Bookings booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.ROOM_NOT_FOUND));
+        boolean isOwner = booking.getPosts() != null
+                && booking.getPosts().getOwner() != null
+                && userId.equals(booking.getPosts().getOwner().getId());
+        boolean isBooker = booking.getUser() != null && userId.equals(booking.getUser().getId());
+        if (!isBooker && !isOwner) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        return ApiResponse.<BookingResponse>builder()
+                .message("Lấy chi tiết đặt phòng thành công")
+                .data(bookingMapper.toBookingresponse(booking))
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public ApiResponse<Void> cancelBooking(String id) {
+        String userId = securityUtil.getCurrentUserId();
+        Bookings booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.ROOM_NOT_FOUND));
+        if (booking.getUser() == null || !userId.equals(booking.getUser().getId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        if (Booking_status.CHECKED_IN.getCode().equals(booking.getStats())
+                || Booking_status.CHECKED_OUT.getCode().equals(booking.getStats())
+                || Booking_status.COMPLETED.getCode().equals(booking.getStats())
+                || Booking_status.CANCELLED.getCode().equals(booking.getStats())) {
+            throw new AppException(ErrorCode.INVALID_KEY);
+        }
+        booking.setStats(Booking_status.CANCELLED.getCode());
+        bookingRepository.save(booking);
+
+        if (booking.getPostsAvailabilities() != null && !booking.getPostsAvailabilities().isEmpty()) {
+            postAvailabilityRepository.deleteAll(booking.getPostsAvailabilities());
+        }
+
+        return ApiResponse.<Void>builder()
+                .message("Hủy đặt phòng thành công")
+                .build();
+    }
+
+    @Override
+    public ApiResponse<List<BookingResponse>> getHostBookings() {
+        String userId = securityUtil.getCurrentUserId();
+        List<Bookings> list = bookingRepository.findByPostsOwnerIdOrderByCreatedAtDesc(userId);
+        List<BookingResponse> responses = list.stream()
+                .map(bookingMapper::toBookingresponse)
+                .toList();
+        return ApiResponse.<List<BookingResponse>>builder()
+                .message("Lấy danh sách đặt phòng của chủ nhà thành công")
+                .data(responses)
+                .build();
     }
 
     private void validateRequest(final BookingCreateRequest request) {
